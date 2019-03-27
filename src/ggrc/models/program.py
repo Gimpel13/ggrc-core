@@ -5,10 +5,15 @@
 
 from sqlalchemy import orm
 <<<<<<< HEAD
+<<<<<<< HEAD
 from werkzeug import exceptions as wzg_exceptions
 
 =======
 >>>>>>> Reorganize imports in program model
+=======
+from werkzeug import exceptions as wzg_exceptions
+
+>>>>>>> Add handler for invalid program deletion
 
 from ggrc import db
 from ggrc.fulltext.mixin import Indexed
