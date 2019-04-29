@@ -5,7 +5,7 @@
 {{#each items}}
     <div class="ggrc-form-item {{#if_in attributeType 'input,text'}}ggrc-form-item--row{{else}}ggrc-form-item--column{{/if}}">
             <inline-edit-control class="inline-edit-control"
-                on:inlineSave="updateGlobalAttribute(%event, %context)"
+                on:inlineSave="updateGlobalAttribute(scope.event, %context)"
                 instance:from="instance"
                 dropdownOptions:from="multiChoiceOptions"
                 dropdownClass:from="dropdownClass"
@@ -17,7 +17,7 @@
                 type:from="attributeType"
                 withReadMore:from="true">
                       <confirm-edit-action
-                          on:setEditMode="setEditModeInline(%event)"
+                          on:setEditMode="setEditModeInline(scope.event)"
                           on:setInProgress="setInProgressState()"
                           instance:from="instance"
                           onStateChangeDfd:from="onStateChangeDfd"
