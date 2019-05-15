@@ -320,25 +320,23 @@
                                               class="ggrc-form ggrc-form-multiple-columns">
                 </assessment-custom-attributes>
                 <div class="info-pane__section ggrc-form">
-                    <div class="ggrc-form-item">
-                        <div class="ggrc-form-item__multiple-row">
-                            <assessment-object-type-dropdown
-                                instance:from="instance"
-                                assessmentType:bind="instance.assessment_type">
-                                <assessment-inline-item
-                                    type:from="'dropdown'"
-                                    propName:from="'assessment_type'"
-                                    isGroupedDropdown:from="true"
-                                    setInProgress:from="@setInProgressState"
-                                    onStateChangeDfd:from="onStateChangeDfd"
-                                    dropdownOptionsGroups:from="objectTypes"
-                                    isEditIconDenied:from="isEditDenied"
-                                    value:from="instance.assessment_type"
-                                    instance:from="instance">
-                                        <div class="ggrc-form__title">Assessment Type</div>
-                                </assessment-inline-item>
-                            </assessment-object-type-dropdown>
-                        </div>
+                    <div class="ggrc-form-item ggrc-form-item--column">
+                        <assessment-object-type-dropdown
+                            instance:from="instance"
+                            assessmentType:bind="instance.assessment_type">
+                            <assessment-inline-item
+                                type:from="'dropdown'"
+                                propName:from="'assessment_type'"
+                                isGroupedDropdown:from="true"
+                                setInProgress:from="@setInProgressState"
+                                onStateChangeDfd:from="onStateChangeDfd"
+                                dropdownOptionsGroups:from="objectTypes"
+                                isEditIconDenied:from="isEditDenied"
+                                value:from="instance.assessment_type"
+                                instance:from="instance">
+                                    <div class="ggrc-form__title">Assessment Type</div>
+                            </assessment-inline-item>
+                        </assessment-object-type-dropdown>
                     </div>
                 </div>
                 <div class="info-pane__section action-toolbar-container">
@@ -377,38 +375,34 @@
                     </assessment-mapped-controls>
                 </div>
                 <div class="ggrc-form ggrc-form-multiple-columns">
-                <div class="ggrc-form-item">
-                    <div class="ggrc-form-item__row">
-                        <assessment-inline-item
-                            type:from="'text'"
-                            propName:from="'description'"
-                            withReadMore:from="true"
-                            setInProgress:from="@setInProgressState"
-                            onStateChangeDfd:from="onStateChangeDfd"
-                            isEditIconDenied:from="isEditDenied"
-                            value:from="instance.description"
-                            instance:from="instance">
-                                <div class="ggrc-form__title">Description</div>
-                        </assessment-inline-item>
-                    </div>
+                <div class="ggrc-form-item ggrc-form-item--row">
+                    <assessment-inline-item
+                        type:from="'text'"
+                        propName:from="'description'"
+                        withReadMore:from="true"
+                        setInProgress:from="@setInProgressState"
+                        onStateChangeDfd:from="onStateChangeDfd"
+                        isEditIconDenied:from="isEditDenied"
+                        value:from="instance.description"
+                        instance:from="instance">
+                            <div class="ggrc-form__title">Description</div>
+                    </assessment-inline-item>
                 </div>
                 <div class="ggrc-form-item">
                     {{> /static/templates/assessments/dates_list.stache}}
                 </div>
-                <div class="ggrc-form-item">
-                    <div class="ggrc-form-item__row">
-                        <assessment-inline-item
-                            type:from="'text'"
-                            propName:from="'notes'"
-                            withReadMore:from="true"
-                            setInProgress:from="@setInProgressState"
-                            onStateChangeDfd:from="onStateChangeDfd"
-                            isEditIconDenied:from="isEditDenied"
-                            value:from="instance.notes"
-                            instance:from="instance">
-                                <div class="ggrc-form__title">Notes</div>
-                        </assessment-inline-item>
-                    </div>
+                <div class="ggrc-form-item ggrc-form-item--row">
+                    <assessment-inline-item
+                        type:from="'text'"
+                        propName:from="'notes'"
+                        withReadMore:from="true"
+                        setInProgress:from="@setInProgressState"
+                        onStateChangeDfd:from="onStateChangeDfd"
+                        isEditIconDenied:from="isEditDenied"
+                        value:from="instance.notes"
+                        instance:from="instance">
+                            <div class="ggrc-form__title">Notes</div>
+                    </assessment-inline-item>
                 </div>
                 <div class="ggrc-form-item ggrc-form-item--column">
                     <div class="info-pane__section-title">Code</div>
