@@ -325,8 +325,10 @@ class TestPeopleAdministration(base.Test):
     self.general_equal_assert(creator.people_tree_item_representation(),
                               act_person)
 
-  def test_second_tier_opening(self, creator, person_tree_item_data):
-    """Check that the second tier of the tree view is opening after clicking.
-    """
-    self.general_equal_assert(creator.people_tree_item_representation(),
-                              person_tree_item_data)
+  def test_edit_authorizations(self, creator, selenium):
+    """Check that person role can be edited."""
+    exp_person = creator.people_tree_item_representation()
+    exp_person.system_wide_role = roles.ADMINISTRATOR
+    act_person = admin_webui_service.PeopleAdminWebUiService(
+        selenium).edit_authorizations(creator, roles.ADMINISTRATOR)
+    self.general_equal_assert(exp_person, act_person)
