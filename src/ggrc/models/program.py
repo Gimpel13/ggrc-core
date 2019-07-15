@@ -78,7 +78,6 @@ class Program(mega.Mega,
   _api_attrs = reflection.ApiAttributes(
       'kind',
       reflection.Attribute('audits', create=False, update=False),
-      reflection.Attribute('risk_assessments', create=False, update=False),
   )
   _include_links = []
   _aliases = {
@@ -91,7 +90,6 @@ class Program(mega.Mega,
     query = super(Program, cls).eager_query()
     return cls.eager_inclusions(query, Program._include_links).options(
         orm.subqueryload('audits'),
-        orm.subqueryload('risk_assessments'),
     )
 
   def _check_no_audits(self):
