@@ -22,6 +22,7 @@ from integration.ggrc.models.test_assessment_base import TestAssessmentBase
 from appengine import base
 
 
+@ddt.ddt
 class TestAssessment(TestAssessmentBase):
   """Assessment test cases"""
   # pylint: disable=invalid-name
@@ -387,6 +388,53 @@ class TestAssessment(TestAssessmentBase):
         # Mapped Assignee roles should be created for all snapshots, not only
         # for control that related to assessment
         self.assert_propagated_role(role, person_email, snapshot)
+
+  @ddt.data(
+      "Person",
+  )
+  def test_assessment_with_several_mapped_objects(self, attribute_value):
+    """Test cav on assessment with several mapped {0} objects"""
+    factory = factories.get_model_factory(attribute_value)
+
+    assessment = factories.AssessmentFactory()
+    attribute_object1 = factory()
+    attribute_object2 = factory()
+
+    expected_attribute_objects_ids = [
+        [attribute_object1.id, attribute_object2.id],
+        [attribute_object1.id, attribute_object2.id],
+    ]
+
+    with factories.single_commit():
+      cad = factories.CustomAttributeDefinitionFactory(
+          definition_type="assessment",
+          definition_id=assessment.id,
+          attribute_type="Map:{}".format(attribute_value),
+      )
+
+      cav1 = factories.CustomAttributeValueFactory(
+          custom_attribute=cad,
+          attributable=assessment,
+          attribute_value=attribute_value,
+      )
+      cav1.attribute_object = attribute_object1
+
+      cav2 = factories.CustomAttributeValueFactory(
+          custom_attribute=cad,
+          attributable=assessment,
+          attribute_value=attribute_value,
+      )
+      cav2.attribute_object = attribute_object2
+
+    response_json = self.api.get(
+        assessment, assessment.id).json["assessment"]
+
+    attribute_objects_ids = [
+        [obj["id"] for obj in cav["attribute_objects"]]
+        for cav in response_json["custom_attribute_values"]
+    ]
+
+    self.assertEquals(attribute_objects_ids, expected_attribute_objects_ids)
 
 
 @ddt.ddt
