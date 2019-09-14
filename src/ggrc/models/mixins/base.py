@@ -298,7 +298,7 @@ class Base(Dictable, ChangeTracked, Identifiable):
       "contact_id",
       "secondary_contact_id",
       "modified_by_id",
-      "attribute_object_id",  # used for person mapping CA
+      "attribute_objects_id",  # used for person mapping CA
   ]
 
   @staticmethod
@@ -339,7 +339,12 @@ class Base(Dictable, ChangeTracked, Identifiable):
       if hasattr(self, attr):
         value = getattr(self, attr)
         # hardcoded [:-3] is used to strip "_id" suffix
-        res[attr[:-3]] = self._person_stub(value) if value else None
+        if isinstance(value, list):
+          res[attr[:-3]] = [
+              self._person_stub(v) for v in value
+          ] if value else None
+        else:
+          res[attr[:-3]] = self._person_stub(value) if value else None
 
     for attr_name in AttributeInfo.gather_publish_attrs(self.__class__):
       if is_attr_of_type(self, attr_name, models.Option):
