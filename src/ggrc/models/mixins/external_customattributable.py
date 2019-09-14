@@ -26,6 +26,13 @@ logger = getLogger(__name__)
 class ExternalCustomAttributable(CustomAttributableBase):
   """External Custom Attributable mixin."""
 
+  @property
+  def _values_map(self):
+    return {
+        value.custom_attribute_id or value.custom_attribute.id: value
+        for value in self.custom_attribute_values
+    }
+
   @declared_attr
   def custom_attribute_definitions(cls):  # pylint: disable=no-self-argument
     """Load custom attribute definitions"""
