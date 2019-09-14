@@ -23,6 +23,7 @@ from integration.ggrc.models.test_assessment_base import TestAssessmentBase
 from appengine import base
 
 
+@ddt.ddt
 class TestAssessment(TestAssessmentBase):
   """Assessment test cases"""
   # pylint: disable=invalid-name
@@ -427,6 +428,67 @@ class TestAssessment(TestAssessmentBase):
       })
 
     self.assert201(response)
+
+  @ddt.data(
+      "Person",
+  )
+  def test_assessment_with_several_mapped_objects(self, attribute_value):
+    """Test cav on assessment with several mapped {0} objects"""
+    factory = factories.get_model_factory(attribute_value)
+
+    assessment = factories.AssessmentFactory()
+    attribute_object1 = factory()
+    attribute_object2 = factory()
+
+    expected_attribute_objects_ids = [
+        attribute_object1.id,
+        attribute_object2.id,
+    ]
+    expected_attribute_objects_ids_after_delete = [attribute_object1.id]
+
+    with factories.single_commit():
+      cad = factories.CustomAttributeDefinitionFactory(
+          definition_type="assessment",
+          definition_id=assessment.id,
+          attribute_type="Map:{}".format(attribute_value),
+      )
+
+      cav1 = factories.CustomAttributeValueFactory(
+          custom_attribute=cad,
+          attributable=assessment,
+          attribute_value=attribute_value,
+      )
+      cav1.attribute_object = attribute_object1
+
+      cav2 = factories.CustomAttributeValueFactory(
+          custom_attribute=cad,
+          attributable=assessment,
+          attribute_value=attribute_value,
+      )
+      cav2.attribute_object = attribute_object2
+
+    response_json = self.api.get(assessment, assessment.id).json["assessment"]
+
+    attribute_objects_ids = [
+        obj["id"] for cav in response_json["custom_attribute_values"]
+        for obj in cav["attribute_objects"]
+    ]
+
+    self.assertEquals(attribute_objects_ids, expected_attribute_objects_ids)
+
+    db.session.delete(cav2)
+    db.session.commit()
+
+    response_json = self.api.get(assessment, assessment.id).json["assessment"]
+    attribute_objects_ids = [
+        obj["id"] for cav in response_json["custom_attribute_values"]
+        for obj in cav["attribute_objects"]
+    ]
+
+    self.assertEquals(
+        attribute_objects_ids,
+        expected_attribute_objects_ids_after_delete
+    )
 
 
 @ddt.ddt
