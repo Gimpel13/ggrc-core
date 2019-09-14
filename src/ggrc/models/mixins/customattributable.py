@@ -65,7 +65,10 @@ class CustomAttributableBase(object):
       return
 
     self._values_map = {
-        value.custom_attribute_id or value.custom_attribute.id: value
+        (
+            value.custom_attribute_id or value.custom_attribute.id,
+            value.attribute_object_id,
+        ): value
         for value in self.custom_attribute_values
     }
     # pylint: disable=not-an-iterable
@@ -76,7 +79,8 @@ class CustomAttributableBase(object):
     # pylint: enable=not-an-iterable
 
     if isinstance(values[0], dict):
-      self._add_ca_value_dicts(values)
+      new_values = self._extend_values(values)
+      self._add_ca_value_dicts(new_values)
     else:
       self._add_ca_values(values)
 
@@ -87,7 +91,9 @@ class CustomAttributableBase(object):
       values: list of CustomAttributeValue models
     """
     for new_value in values:
-      existing_value = self._values_map.get(new_value.custom_attribute.id)
+      existing_value = self._values_map.get(
+          (new_value.custom_attribute.id, new_value.attribute_object_id)
+      )
       if existing_value:
         existing_value.attribute_value = new_value.attribute_value
         existing_value.attribute_object_id = new_value.attribute_object_id
@@ -202,6 +208,11 @@ class CustomAttributable(CustomAttributableBase):
         order_by="CustomAttributeDefinition.id"
     )
 
+  @property
+  def _custom_attributes_groupby_custom_attribute(self):
+    cavs = self.custom_attribute_values
+    return {cav.custom_attribute_id: cav for cav in cavs}.values()
+
   @declared_attr
   def _custom_attribute_values(cls):  # pylint: disable=no-self-argument
     """Load custom attribute values"""
@@ -260,6 +271,119 @@ class CustomAttributable(CustomAttributableBase):
         ),
     )
 
+  def _extend_values(self, values):
+    """
+    Change dict from FE expanding nested cavs in attribute_objects
+
+    Args:
+      values: dict that from FE
+
+    Returns:
+      new values that contains extended list of cavs
+    """
+    result = []
+    actual_values_map_ids = set()
+    for value in values:
+      if value.get("attribute_value") and isinstance(value.get("attribute_objects"), list):
+        for attribute_object in value.get("attribute_objects"):
+          new_value = value.copy()
+          new_value["attribute_object"] = attribute_object
+          new_value["attribute_object_id"] = attribute_object.get("id")
+          result.append(new_value)
+          actual_values_map_ids.add(
+              (
+                  new_value.get("custom_attribute_id"),
+                  new_value.get("attribute_object_id"),
+              )
+          )
+      elif value.get("attribute_value") == "":
+        new_value = value.copy()
+        new_value["attribute_object"] = None
+        new_value["attribute_object_id"] = 0
+        result.append(new_value)
+        actual_values_map_ids.add(
+            (
+                new_value.get("custom_attribute_id"),
+                new_value.get("attribute_object_id"),
+            )
+        )
+
+    cav_keys = list(set(self._values_map) - actual_values_map_ids)
+    for cav_key in cav_keys:
+      # finding cavs to delete
+      cav = self._values_map.get(cav_key)
+      result.append({
+          "custom_attribute_id": cav.custom_attribute_id,
+          "attribute_object_id": cav.attribute_object_id,
+          "attribute_value": cav.attribute_value,
+          "attribute_object": None,
+      })
+
+    return result
+
+  def _complete_or_delete(self, attr, value):
+    """
+    Delete cav if it has mapping and has't attribute_object
+    Complete when we don't need to delete
+
+    Args:
+      attr: cav to complete of delete
+      value: dict related to cav
+    """
+    if attr.attribute_value and not value.get("attribute_object"):
+      db.session.delete(attr)
+      db.session.commit()
+    else:
+      attr.attributable = self
+      attr.attribute_value = value.get("attribute_value")
+      attr.attribute_object_id = value.get("attribute_object_id")
+
+  def _create_cav(self, value):
+    """
+    Creating cav
+
+    Args:
+      value: cav value
+
+    Raises:
+      BadRequest: cav value is invalid
+    """
+    from ggrc.utils import referenced_objects
+    from ggrc.models.custom_attribute_value import CustomAttributeValue
+    # this is automatically appended to self._custom_attribute_values
+    # on attributable=self
+    custom_attribute_id = value.get("custom_attribute_id")
+    custom_attribute = referenced_objects.get(
+        "CustomAttributeDefinition", custom_attribute_id
+    )
+    attribute_object = value.get("attribute_object")
+    if attribute_object is None:
+      CustomAttributeValue(
+          attributable=self,
+          custom_attribute=custom_attribute,
+          custom_attribute_id=custom_attribute_id,
+          attribute_value=value.get("attribute_value"),
+          attribute_object_id=value.get("attribute_object_id"),
+      )
+    elif isinstance(attribute_object, dict):
+      attribute_object_type = attribute_object.get("type")
+      attribute_object_id = attribute_object.get("id")
+
+      attribute_object = referenced_objects.get(
+          attribute_object_type, attribute_object_id
+      )
+
+      cav = CustomAttributeValue(
+          attributable=self,
+          custom_attribute=custom_attribute,
+          custom_attribute_id=custom_attribute_id,
+          attribute_value=value.get("attribute_value"),
+          attribute_object_id=value.get("attribute_object_id"),
+      )
+      cav.attribute_object = attribute_object
+    else:
+      raise BadRequest("Bad custom attribute value inserted")
+
   def _add_ca_value_dicts(self, values):
     """Add CA dict representations to _custom_attributes_values property.
 
@@ -269,60 +393,16 @@ class CustomAttributable(CustomAttributableBase):
     Args:
       values: List of dictionaries that represent custom attribute values.
     """
-    from ggrc.utils import referenced_objects
-    from ggrc.models.custom_attribute_value import CustomAttributeValue
-
     for value in values:
-      # TODO: decompose to smaller methods
       # TODO: remove complicated nested conditions, better to use
       # instant exception raising
-      if not value.get("attribute_object_id"):
-        # value.get("attribute_object", {}).get("id") won't help because
-        # value["attribute_object"] can be None
-        value["attribute_object_id"] = (value["attribute_object"].get("id") if
-                                        value.get("attribute_object") else
-                                        None)
-
-      attr = self._values_map.get(value.get("custom_attribute_id"))
+      attr = self._values_map.get(
+          (value.get("custom_attribute_id"), value.get("attribute_object_id"))
+      )
       if attr:
-        attr.attributable = self
-        attr.attribute_value = value.get("attribute_value")
-        attr.attribute_object_id = value.get("attribute_object_id")
+        self._complete_or_delete(attr, value)
       elif "custom_attribute_id" in value:
-        # this is automatically appended to self._custom_attribute_values
-        # on attributable=self
-        custom_attribute_id = value.get("custom_attribute_id")
-        custom_attribute = referenced_objects.get(
-            "CustomAttributeDefinition", custom_attribute_id
-        )
-        attribute_object = value.get("attribute_object")
-
-        if attribute_object is None:
-          CustomAttributeValue(
-              attributable=self,
-              custom_attribute=custom_attribute,
-              custom_attribute_id=custom_attribute_id,
-              attribute_value=value.get("attribute_value"),
-              attribute_object_id=value.get("attribute_object_id"),
-          )
-        elif isinstance(attribute_object, dict):
-          attribute_object_type = attribute_object.get("type")
-          attribute_object_id = attribute_object.get("id")
-
-          attribute_object = referenced_objects.get(
-              attribute_object_type, attribute_object_id
-          )
-
-          cav = CustomAttributeValue(
-              attributable=self,
-              custom_attribute=custom_attribute,
-              custom_attribute_id=custom_attribute_id,
-              attribute_value=value.get("attribute_value"),
-              attribute_object_id=value.get("attribute_object_id"),
-          )
-          cav.attribute_object = attribute_object
-        else:
-          raise BadRequest("Bad custom attribute value inserted")
+        self._create_cav(value)
       elif "href" in value:
         # Ignore setting of custom attribute stubs. Getting here means that the
         # front-end is not using the API correctly and needs to be updated.
@@ -544,11 +624,18 @@ class CustomAttributable(CustomAttributableBase):
     from ggrc.models.custom_attribute_definition import \
         CustomAttributeDefinition
 
+    # import pdb; pdb.set_trace()
     res = super(CustomAttributable, self).log_json()
 
     if self.custom_attribute_values:
+
+      self._values_map_by_custom_attribute = {
+          value.custom_attribute_id: value
+          for value in self.custom_attribute_values
+      }
+
       res["custom_attribute_values"] = [
-          value.log_json() for value in self.custom_attribute_values]
+          value.log_json() for value in self._values_map_by_custom_attribute.values()]
       # fetch definitions form database because `self.custom_attribute`
       # may not be populated
       defs = CustomAttributeDefinition.query.filter(
