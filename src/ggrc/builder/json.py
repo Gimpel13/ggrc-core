@@ -22,6 +22,7 @@ import ggrc.services
 from ggrc import db
 from ggrc.login import get_current_user_id, is_external_app_user
 from ggrc.models.mixins import WithProtectedAttributes
+from ggrc.models.mixins import CustomAttributable
 from ggrc.models.mixins.synchronizable import Synchronizable
 from ggrc.models.mixins.with_ext_custom_attrs import WithExtCustomAttrsSetter
 from ggrc.models.mixins.with_readonly_access import WithReadOnlyAccess
@@ -258,8 +259,7 @@ class UpdateAttrHandler(object):
       if rel_ids:
         return db.session.query(rel_class).filter(
             rel_class.id.in_(rel_ids)).all()
-      else:
-        return []
+      return []
     else:
       rel_obj = json_obj.get(attr_name)
       if rel_obj:
@@ -627,12 +627,30 @@ class Builder(AttributeInfo):
             target_type, getattr(o, target_name))
         for o in join_objects]
 
+  def _publish_cavs(self, obj):
+    # pylint: disable=protected-access
+    """
+    Return for cavs for attributable model with local custom attribute value
+    Args:
+      obj: attributable object
+
+    Returns:
+      cavs for attributable model with local custom attribute value
+    """
+    if obj.__class__.__name__ in CustomAttributable.MODELS_WITH_LOCAL_CADS:
+      return obj._custom_attributes_for_lca_model
+    return obj.custom_attribute_values
+
   def publish_relationship(
           self, obj, attr_name, class_attr, inclusions, include,
           inclusion_filter):
+    # pylint: disable=too-many-arguments
     uselist = class_attr.property.uselist
     if uselist:
-      join_objects = getattr(obj, attr_name)
+      if attr_name == "custom_attribute_values":
+        join_objects = self._publish_cavs(obj)
+      else:
+        join_objects = getattr(obj, attr_name)
       return self.publish_link_collection(
           join_objects, inclusions, include, inclusion_filter)
     elif include or class_attr.property.backref:
@@ -688,9 +706,16 @@ class Builder(AttributeInfo):
     elif class_attr.__class__.__name__ == 'property':
       if not inclusions or include:
         if getattr(obj, '{0}_id'.format(attr_name)):
-          result = LazyStubRepresentation(
-              getattr(obj, '{0}_type'.format(attr_name)),
-              getattr(obj, '{0}_id'.format(attr_name)))
+          attr = getattr(obj, attr_name)
+          if isinstance(attr, list):
+            result = [LazyStubRepresentation(
+                o.__class__.__name__,
+                o.id,
+            ) for o in attr]
+          else:
+            result = LazyStubRepresentation(
+                getattr(obj, '{0}_type'.format(attr_name)),
+                getattr(obj, '{0}_id'.format(attr_name)))
       else:
         result = self.publish_link(
             obj, attr_name, inclusions, include, inclusion_filter)
