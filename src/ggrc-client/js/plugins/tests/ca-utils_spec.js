@@ -161,15 +161,14 @@ describe('ca-utils', function () {
         expect(ca.attr('attribute_value')).toBe('Person');
       });
 
-      it('assigns object with specified id to "attribute_object" attr',
+      it('assigns objects with specified id to "attribute_objects" attr',
         function () {
-          let value = 'mockValue';
+          const value = [{id: 1}, {id: 2}, {id: 3}];
+          const expectedResult = value.map(({id}) => ({type: 'Person', id}));
           setCustomAttributeValue(ca, value);
 
-          expect(ca.attr('attribute_object').serialize()).toEqual({
-            type: 'Person',
-            id: value,
-          });
+          expect(ca.attr('attribute_objects').serialize())
+            .toEqual(expectedResult);
         });
     });
   });

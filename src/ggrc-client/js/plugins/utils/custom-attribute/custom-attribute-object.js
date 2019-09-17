@@ -12,6 +12,8 @@ import {
   caDefTypeName,
 } from './custom-attribute-config';
 import {CONTROL_TYPE} from '../control-utils.js';
+import loMap from 'lodash/map';
+import loFilter from 'lodash/filter';
 
 /**
  * Represents relationships between back-end custom attribute control types
@@ -79,7 +81,14 @@ export default class CustomAttributeObject {
 
     switch (attributeType) {
       case caDefTypeName.MapPerson:
-        return caValue.attr('attribute_object.id') || null;
+        if (caValue.attr('attribute_objects')) {
+          const attributeObjects = caValue.attr('attribute_objects');
+          const filtredAttributeObjects =
+            loFilter(attributeObjects, ({id}) => id);
+          return filtredAttributeObjects.length ?
+            filtredAttributeObjects : null;
+        }
+        return null;
       case caDefTypeName.Checkbox:
         return Boolean(Number(caValue.attr('attribute_value')));
       default:
@@ -95,9 +104,9 @@ export default class CustomAttributeObject {
    */
   set value(newValue) {
     const caValue = this._caValue;
-    const attributeObject = this._prepareAttributeObject(newValue);
+    const attributeObjects = this._prepareAttributeObjects(newValue);
     const attributeValue = this._prepareAttributeValue(newValue);
-    caValue.attr('attribute_object', attributeObject);
+    caValue.attr('attribute_objects', attributeObjects);
     caValue.attr('attribute_value', attributeValue);
   }
 
@@ -163,8 +172,8 @@ export default class CustomAttributeObject {
    * of the custom attribute.
    * @return {ObjectStub} - The person stub.
    */
-  get attributeObject() {
-    return this._caValue.attr('attribute_object');
+  get attributeObjects() {
+    return this._caValue.attr('attribute_objects');
   }
 
   /**
@@ -238,10 +247,10 @@ export default class CustomAttributeObject {
    * Object = Objective
    * Fields:
    *
-   * attribute_object -
+   * attribute_objects -
    *   here there are 2 cases:
-   *     1) if we have "Map:Person" custom attribute then set {@link ObjectStub}
-   *        of the person.
+   *     1) if we have "Map:Person" custom attribute then set array of {@link ObjectStub}
+   *        with person.
    *     2) in other cases it must be null.
    * attribute_value - value for custom attribute
    *    for Map:Person - "Person" string
@@ -258,7 +267,7 @@ export default class CustomAttributeObject {
     const caAttributeValue = caValue.attr('attribute_value');
     // setup default values for mandatory fields
     const requiredDefaultFields = {
-      attribute_object: null,
+      attribute_objects: null,
       attribute_value: this._prepareAttributeValue(caAttributeValue),
       context: instance.attr('context'),
       custom_attribute_id: caDefinition.attr('id'),
@@ -313,20 +322,18 @@ export default class CustomAttributeObject {
    * @param {string|number} value - The value for the processing.
    * @return {ObjectStub|null} - The prepared object.
    */
-  _prepareAttributeObject(value) {
+  _prepareAttributeObjects(value) {
     const caDef = this._caDefinition;
     const attributeType = caDef.attr('attribute_type');
 
     if (attributeType !== caDefTypeName.MapPerson) {
       return null;
     }
+    const validPersonObjects = loFilter(value, ({id}) => id);
+    const personStubObjects =
+      loMap(validPersonObjects, ({id, type}) => ({id, type}));
 
-    const personStub = {
-      id: value,
-      type: 'Person',
-    };
-
-    return value ? personStub : caDef.attr('default_value');
+    return value ? personStubObjects : caDef.attr('default_value');
   }
 
   /**
