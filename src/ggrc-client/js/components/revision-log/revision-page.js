@@ -334,14 +334,15 @@ export default canComponent.extend({
               ? '✓'
               : undefined;
           case 'Map:Person':
-            if (!value.attribute_object) {
+            if (!value.attribute_objects) {
               return;
             }
-            obj = Person.findInCacheById(value.attribute_object.id);
+            obj = loMap(value.attribute_objects,
+              ({id}) => Person.findInCacheById(id));
             if (obj === undefined) {
               return value.attribute_value;
             }
-            return obj.name || obj.email || value.attribute_value;
+            return obj.length ? obj : value.attribute_value;
           case 'Date':
             if (!value.attribute_value) {
               return value.attribute_value;

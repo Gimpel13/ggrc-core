@@ -321,28 +321,28 @@ describe('conflict resolvers', () => {
       });
     });
 
-    describe('checks attribute object and', () => {
+    describe('checks attribute objects and', () => {
       it('resolves change of different fields', () => {
         previousValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 1},
+          attribute_objects: [{id: 1}, {id: 3}],
         }, {
           custom_attribute_id: 2,
-          attribute_object: {id: 1},
+          attribute_objects: [{id: 1}, {id: 3}],
         }];
         currentValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 2},
+          attribute_objects: [{id: 2}, {id: 3}],
         }, {
           custom_attribute_id: 2,
-          attribute_object: {id: 1},
+          attribute_objects: [{id: 1}, {id: 3}],
         }];
         remoteValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 1},
+          attribute_objects: [{id: 1}, {id: 3}],
         }, {
           custom_attribute_id: 2,
-          attribute_object: {id: 2},
+          attribute_objects: [{id: 2}, {id: 3}],
         }];
         container = new canList(remoteValue);
 
@@ -353,22 +353,24 @@ describe('conflict resolvers', () => {
           container);
 
         expect(hasConflict).toBe(false);
-        expect(container.attr('0.attribute_object').attr()).toEqual({id: 2});
-        expect(container.attr('1.attribute_object').attr()).toEqual({id: 2});
+        expect(container.attr('0.attribute_objects').attr())
+          .toEqual([{id: 2}, {id: 3}]);
+        expect(container.attr('1.attribute_objects').attr())
+          .toEqual([{id: 2}, {id: 3}]);
       });
 
       it('resolves server change', () => {
         previousValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 1},
+          attribute_objects: [{id: 1}, {id: 3}],
         }];
         currentValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 1},
+          attribute_objects: [{id: 1}, {id: 3}],
         }];
         remoteValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 2},
+          attribute_objects: [{id: 2}, {id: 3}],
         }];
         container = new canList(remoteValue);
 
@@ -379,21 +381,22 @@ describe('conflict resolvers', () => {
           container);
 
         expect(hasConflict).toBe(false);
-        expect(container.attr('0.attribute_object').attr()).toEqual({id: 2});
+        expect(container.attr('0.attribute_objects').attr())
+          .toEqual([{id: 2}, {id: 3}]);
       });
 
       it('resolves local change', () => {
         previousValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 1},
+          attribute_objects: [{id: 1}, {id: 3}],
         }];
         currentValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 2},
+          attribute_objects: [{id: 2}, {id: 3}],
         }];
         remoteValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 1},
+          attribute_objects: [{id: 1}, {id: 3}],
         }];
         container = new canList(remoteValue);
 
@@ -404,21 +407,22 @@ describe('conflict resolvers', () => {
           container);
 
         expect(hasConflict).toBe(false);
-        expect(container.attr('0.attribute_object').attr()).toEqual({id: 2});
+        expect(container.attr('0.attribute_objects').attr())
+          .toEqual([{id: 2}, {id: 3}]);
       });
 
       it('resolves the same local and server change', () => {
         previousValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 1},
+          attribute_objects: [{id: 1}, {id: 3}],
         }];
         currentValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 2},
+          attribute_objects: [{id: 2}, {id: 3}],
         }];
         remoteValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 2},
+          attribute_objects: [{id: 2}, {id: 3}],
         }];
         container = new canList(remoteValue);
 
@@ -429,21 +433,22 @@ describe('conflict resolvers', () => {
           container);
 
         expect(hasConflict).toBe(false);
-        expect(container.attr('0.attribute_object').attr()).toEqual({id: 2});
+        expect(container.attr('0.attribute_objects').attr())
+          .toEqual([{id: 2}, {id: 3}]);
       });
 
       it('does not resolve different local and server change', () => {
         previousValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 1},
+          attribute_objects: [{id: 1}, {id: 4}],
         }];
         currentValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 2},
+          attribute_objects: [{id: 2}, {id: 4}],
         }];
         remoteValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 3},
+          attribute_objects: [{id: 3}, {id: 4}],
         }];
         container = new canList(remoteValue);
 

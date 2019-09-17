@@ -6,6 +6,7 @@
 import loGet from 'lodash/get';
 import loKeyBy from 'lodash/keyBy';
 import loIsEqual from 'lodash/isEqual';
+
 export function buildChangeDescriptor(
   previousValue,
   currentValue,
@@ -79,8 +80,7 @@ export function customAttributeResolver(
       currentValueItem,
       remoteValueItem,
       containerValueItem,
-      'attribute_object.id',
-      'attribute_object');
+      'attribute_objects');
 
     conflict = conflict || hasValueConflict || hasObjectConflict;
   });
