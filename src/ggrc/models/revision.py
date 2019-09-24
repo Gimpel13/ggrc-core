@@ -94,7 +94,8 @@ class Revision(before_flush_handleable.BeforeFlushHandleable,
     query = super(Revision, cls).eager_query(**kwargs)
     return query.options(
         orm.subqueryload('modified_by'),
-        orm.subqueryload('event'),  # used in description
+        # Event's action is loaded here since it is used in description.
+        orm.joinedload('event').load_only('action'),
     )
 
   def __init__(self, obj, modified_by_id, action, content):
@@ -552,6 +553,7 @@ class Revision(before_flush_handleable.BeforeFlushHandleable,
         "AssessmentTemplate": ["template_object_type", ],
         "Automapping": ["source_type", "destination_type", ],
         "CustomAttributeValue": ["attributable_type", ],
+        "ExternalCustomAttributeValue": ["attributable_type", ],
         "Event": ["resource_type", ],
         "ObjectPerson": ["personable_type", ],
         "Relationship": ["source_type", "destination_type", ],

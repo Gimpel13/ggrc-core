@@ -8,6 +8,7 @@ from ggrc.models import all_models
 from ggrc.snapshotter.rules import Types
 from integration.ggrc import TestCase, Api
 from integration.ggrc.models import factories
+from integration.ggrc import generator
 
 
 def get_snapshottable_models():
@@ -108,14 +109,25 @@ class TestSnapshotQueryApi(TestCase):
   def _create_cas(self):
     """Create custom attribute definitions."""
     self._ca_objects = {}
+    external_ca_model_names = [
+        "control",
+    ]
     ca_model_names = [
         "facility",
-        "control",
         "market",
         "requirement",
         "threat",
         "access_group",
         "data_asset"
+    ]
+    external_ca_args = [
+        {"title": "CA text", "attribute_type": "Text"},
+        {"title": "CA rich text", "attribute_type": "Rich Text"},
+        {"title": "CA date", "attribute_type": "Date"},
+        {"title": "CA multiselect", "attribute_type": "Multiselect",
+         "multi_choice_options": "yes,no"},
+        {"title": "CA dropdown", "attribute_type": "Dropdown",
+         "multi_choice_options": "one,two,three,four,five"},
     ]
     ca_args = [
         {"title": "CA text", "attribute_type": "Text"},
@@ -131,6 +143,13 @@ class TestSnapshotQueryApi(TestCase):
       with app.app_context():
         for args in ca_args:
           factories.CustomAttributeDefinitionFactory(
+              definition_type=type_,
+              **args
+          )
+    for type_ in external_ca_model_names:
+      with app.app_context():
+        for args in external_ca_args:
+          factories.ExternalCustomAttributeDefinitionFactory(
               definition_type=type_,
               **args
           )
@@ -151,7 +170,6 @@ class TestSnapshotQueryApi(TestCase):
               "CA text",
               "CA rich text",
               "CA date",
-              "CA checkbox",
               "CA multiselect",
               "CA dropdown"
           ])
@@ -160,14 +178,13 @@ class TestSnapshotQueryApi(TestCase):
           "CA text": "Control ca text",
           "CA rich text": "control<br><br>\nrich text",
           "CA date": "22/02/2022",
-          "CA checkbox": "yes",
           "CA multiselect": "yes",
           "CA dropdown": "one"
       }
 
       for title, value in ca_values.items():
         for obj in objects:
-          factories.CustomAttributeValueFactory(
+          factories.ExternalCustomAttributeValueFactory(
               custom_attribute=ca_definitions[title],
               attributable=obj,
               attribute_value=value
@@ -248,6 +265,7 @@ class TestSnapshot(TestCase):
   def setUp(self):
     super(TestSnapshot, self).setUp()
     self.api = Api()
+    self.generator = generator.ObjectGenerator()
 
   def test_search_by_reference_url(self):
     """Test search audit related snapshots of control type by reference_url"""
@@ -329,3 +347,32 @@ class TestSnapshot(TestCase):
     )
     self.assert200(response)
     self.assertEquals(1, response.json[0]["Snapshot"]["count"])
+
+  # pylint: disable=invalid-name
+  def test_identity_revision_after_adding_comment(self):
+    """Test checks identity of revisions after adding comment"""
+    with factories.single_commit():
+      audit = factories.AuditFactory()
+      standard = factories.StandardFactory()
+
+    snapshot = self._create_snapshots(audit, [standard])[0]
+    snapshot_id = snapshot.id
+    self.generator.generate_comment(standard, "", "some comment")
+
+    response = self.api.get(snapshot.__class__, snapshot_id)
+    self.assertStatus(response, 200)
+    self.assertTrue(response.json['snapshot']['is_identical_revision'])
+
+  def test_is_identical_revision(self):
+    """Test checks correctly work of is_identical_revision flag"""
+    with factories.single_commit():
+      audit = factories.AuditFactory()
+      standard = factories.StandardFactory()
+      standard_id = standard.id
+
+    snapshot = self._create_snapshots(audit, [standard])[0]
+    snapshot_id = snapshot.id
+    standard = all_models.Standard.query.get(standard_id)
+    self.api.put(standard, {"title": "Test standard 1"})
+    snapshot = all_models.Snapshot.query.get(snapshot_id)
+    self.assertFalse(snapshot.is_identical_revision)

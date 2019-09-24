@@ -258,8 +258,7 @@ class UpdateAttrHandler(object):
       if rel_ids:
         return db.session.query(rel_class).filter(
             rel_class.id.in_(rel_ids)).all()
-      else:
-        return []
+      return []
     else:
       rel_obj = json_obj.get(attr_name)
       if rel_obj:
@@ -679,10 +678,17 @@ class Builder(AttributeInfo):
           obj, attr_name, class_attr, inclusions, include, inclusion_filter)
     elif class_attr.__class__.__name__ == 'property':
       if not inclusions or include:
+        attr = getattr(obj, attr_name)
         if getattr(obj, '{0}_id'.format(attr_name)):
-          result = LazyStubRepresentation(
-              getattr(obj, '{0}_type'.format(attr_name)),
-              getattr(obj, '{0}_id'.format(attr_name)))
+          if isinstance(attr, list):
+            result = [LazyStubRepresentation(
+                o.__class__.__name__,
+                o.id,
+            ) for o in attr]
+          else:
+            result = LazyStubRepresentation(
+                getattr(obj, '{0}_type'.format(attr_name)),
+                getattr(obj, '{0}_id'.format(attr_name)))
       else:
         result = self.publish_link(
             obj, attr_name, inclusions, include, inclusion_filter)

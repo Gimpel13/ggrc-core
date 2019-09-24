@@ -10,6 +10,7 @@ import ddt
 import mock
 
 from ggrc.models import all_models
+from ggrc.utils.revisions_diff import builder as revisions_diff
 
 
 @ddt.ddt
@@ -370,11 +371,52 @@ class TestCheckPopulatedContent(unittest.TestCase):
     content = {"access_control_list": acl_entries}
 
     role_dict = mock.MagicMock()
-    with mock.patch("ggrc.models.custom_attribute_definition.get_cads_counts",
-                    return_value={}):
-      with mock.patch("ggrc.access_control.role.get_custom_roles_for",
-                      return_value=role_dict):
-        revision = all_models.Revision(obj, mock.Mock(), mock.Mock(), content)
+    with mock.patch("ggrc.access_control.role.get_custom_roles_for",
+                    return_value=role_dict):
+      revision = all_models.Revision(obj, mock.Mock(), mock.Mock(), content)
 
-        for acl in revision.content["access_control_list"]:
-          self.assertIsNone(acl.get("parent_id"))
+      for acl in revision.content["access_control_list"]:
+        self.assertIsNone(acl.get("parent_id"))
+
+  @ddt.data(
+      (
+          True,
+          {},
+          {}
+      ),
+      (
+          True,
+          {'key_1': 1, 'key_2': 2, 'key_3': 3},
+          {'key_1': 1, 'key_2': 2, 'key_3': 3}
+      ),
+      (
+          True,
+          {'key_1': 1, 'key_2': 2, 'key_3': None},
+          {'key_1': 1, 'key_2': 2}
+      ),
+      (
+          False,
+          {'key_1': 1, 'key_2': 2, 'key_3': 3},
+          {'key_1': 1, 'key_2': 2, 'key_3': 33}
+      ),
+      (
+          False,
+          {'key_1': 1, 'key_2': 2, 'key_3': 3},
+          {'key_1': 1, 'key_2': 2}
+      ),
+      (
+          False,
+          {'key_1': 1, 'key_2': 2},
+          {'key_1': 1, 'key_2': 2, 'key_3': 3},
+      ),
+
+  )
+  @ddt.unpack
+  def test_is_identical_revision(self, expected_result,
+                                 context_1,
+                                 context_2):
+    """Test checks work of is_identical_revision function"""
+    self.assertEqual(
+        revisions_diff.is_identical_revision(None, context_1, context_2),
+        expected_result
+    )

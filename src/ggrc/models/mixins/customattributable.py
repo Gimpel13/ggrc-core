@@ -12,6 +12,7 @@ from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import foreign
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm import remote
 from werkzeug.exceptions import BadRequest
 
 from ggrc import builder
@@ -25,25 +26,138 @@ logger = getLogger(__name__)
 
 
 # pylint: disable=attribute-defined-outside-init; CustomAttributable is a mixin
-class CustomAttributable(object):
-  """Custom Attributable mixin."""
-
-  MODELS_WITH_LOCAL_CADS = {"Assessment", "AssessmentTemplate"}
-
+class CustomAttributableBase(object):
+  """CustomAttributable and ExternalCustomAttributable base class"""
   _api_attrs = reflection.ApiAttributes(
       'custom_attribute_values',
       reflection.Attribute('custom_attribute_definitions',
                            create=False,
                            update=False),
-      reflection.Attribute('preconditions_failed',
-                           create=False,
-                           update=False),
       reflection.Attribute('custom_attributes', read=False),
   )
+
   _include_links = ['custom_attribute_values', 'custom_attribute_definitions']
+
   _update_raw = ['custom_attribute_values']
 
   _requirement_cache = None
+
+  @hybrid_property
+  def custom_attribute_values(self):
+    return self._custom_attribute_values
+
+  @custom_attribute_values.setter
+  def custom_attribute_values(self, values):
+    """Setter function for custom attribute values.
+
+    This setter function accepts 2 kinds of values:
+      - list of custom attributes. This is used on the back-end by developers.
+      - list of dictionaries containing custom attribute values. This is to
+        have a clean API where the front-end can put the custom attribute
+        values into the custom_attribute_values property and the json builder
+        can then handle the attributes just by setting them.
+
+    Args:
+      value: List of custom attribute values or dicts containing json
+        representation of custom attribute values.
+    """
+    if not values:
+      return
+
+    self._values_map = {
+        (
+            value.custom_attribute_id or value.custom_attribute.id,
+            value.attribute_object_id,
+        ): value
+        for value in self.custom_attribute_values
+    }
+    # pylint: disable=not-an-iterable
+    self._definitions_map = {
+        definition.id: definition
+        for definition in self.custom_attribute_definitions
+    }
+    # pylint: enable=not-an-iterable
+
+    if isinstance(values[0], dict):
+      new_values = self._extend_values(values)
+      self._add_ca_value_dicts(new_values)
+    else:
+      self._add_ca_values(values)
+
+  def _add_ca_values(self, values):
+    """Add CA value objects to _custom_attributes_values property.
+
+    Args:
+      values: list of CustomAttributeValue models
+    """
+    for new_value in values:
+      existing_value = self._values_map.get(
+          (new_value.custom_attribute.id, new_value.attribute_object_id)
+      )
+      if existing_value:
+        existing_value.attribute_value = new_value.attribute_value
+        existing_value.attribute_object_id = new_value.attribute_object_id
+      else:
+        new_value.attributable = self
+        # new_value is automatically appended to self._custom_attribute_values
+        # on new_value.attributable = self
+
+  def validate_custom_attributes(self):
+    """Set CADs and validate CAVs one by one."""
+    # pylint: disable=not-an-iterable; we can iterate over relationships
+    map_ = {d.id: d for d in self.custom_attribute_definitions}
+    for value in self._custom_attribute_values:
+      if not value.custom_attribute and value.custom_attribute_id:
+        value.custom_attribute = map_.get(int(value.custom_attribute_id))
+      value.validate()
+
+  def check_mandatory_requirement(self, requirement):
+    """Check presence of mandatory requirement like evidence or URL.
+
+    Note:  mandatory requirement precondition is checked only once.
+    Any additional changes to evidences or URL after the first checking
+    of the precondition will cause incorrect result of the function.
+    """
+    from ggrc.models.mixins.with_evidence import WithEvidence
+    if isinstance(self, WithEvidence):
+
+      if self._requirement_cache is None:
+        self._requirement_cache = {}
+      if requirement not in self._requirement_cache:
+        required = 0
+        for cav in self.custom_attribute_values:
+          flags = cav.multi_choice_options_to_flags(cav.custom_attribute) \
+                     .get(cav.attribute_value)
+          if flags and flags.get(requirement):
+            required += 1
+
+        fitting = {
+            "evidence": len(self.evidences_file),
+            "url": len(self.evidences_url),
+        }
+        self._requirement_cache[requirement] = fitting[requirement] >= required
+
+      if not self._requirement_cache[requirement]:
+        return [requirement]
+
+    return []
+
+  def invalidate_evidence_found(self):
+    """Invalidate the cached value"""
+    self._requirement_cache = None
+
+
+# pylint: disable=attribute-defined-outside-init; CustomAttributable is a mixin
+class CustomAttributable(CustomAttributableBase):
+  """Custom Attributable mixin."""
+
+  MODELS_WITH_LOCAL_CADS = {"Assessment", "AssessmentTemplate"}
+
+  _api_attrs = reflection.ApiAttributes(
+      reflection.Attribute('preconditions_failed',
+                           create=False,
+                           update=False),
+  )
 
   @declared_attr
   def custom_attribute_definitions(cls):  # pylint: disable=no-self-argument
@@ -97,38 +211,33 @@ class CustomAttributable(object):
   @declared_attr
   def _custom_attribute_values(cls):  # pylint: disable=no-self-argument
     """Load custom attribute values"""
-    current_type = cls.__name__
+    from ggrc.models.custom_attribute_value \
+        import CustomAttributeValue as cav
 
-    joinstr = (
-        "and_("
-        "foreign(remote(CustomAttributeValue.attributable_id)) == {type}.id,"
-        "CustomAttributeValue.attributable_type == '{type}'"
-        ")"
-        .format(type=current_type)
-    )
+    def joinstr():
+      """Primary join function"""
+      return sa.and_(
+          foreign(remote(cav.attributable_id)) == cls.id,
+          cav.attributable_type == cls.__name__
+      )
 
     # Since we have some kind of generic relationship here, it is needed
     # to provide custom joinstr for backref. If default, all models having
     # this mixin will be queried, which in turn produce large number of
     # queries returning nothing and one query returning object.
-    backref_joinstr = (
-        "remote({type}.id) == foreign(CustomAttributeValue.attributable_id)"
-        .format(type=current_type)
-    )
+    def backref_joinstr():
+      """Backref join function"""
+      return remote(cls.id) == foreign(cav.attributable_id)
 
     return db.relationship(
         "CustomAttributeValue",
         primaryjoin=joinstr,
         backref=orm.backref(
-            "{}_custom_attributable".format(current_type),
+            "{}_custom_attributable".format(cls.__name__),
             primaryjoin=backref_joinstr,
         ),
         cascade="all, delete-orphan"
     )
-
-  @hybrid_property
-  def custom_attribute_values(self):
-    return self._custom_attribute_values
 
   @classmethod
   def indexed_query(cls):
@@ -157,55 +266,118 @@ class CustomAttributable(object):
         ),
     )
 
-  @custom_attribute_values.setter
-  def custom_attribute_values(self, values):
-    """Setter function for custom attribute values.
-
-    This setter function accepts 2 kinds of values:
-      - list of custom attributes. This is used on the back-end by developers.
-      - list of dictionaries containing custom attribute values. This is to
-        have a clean API where the front-end can put the custom attribute
-        values into the custom_attribute_values property and the json builder
-        can then handle the attributes just by setting them.
+  def _extend_values(self, values):
+    """
+    Change dict from FE expanding nested cavs in attribute_objects
 
     Args:
-      value: List of custom attribute values or dicts containing json
-        representation of custom attribute values.
+      values: dict that from FE
+
+    Returns:
+      new values that contains extended list of cavs
     """
-    if not values:
-      return
+    result = []
+    actual_values_map_ids = set()
+    for value in values:
+      if value.get("attribute_value") and isinstance(value.get("attribute_objects"), list):
+        for attribute_object in value.get("attribute_objects"):
+          new_value = value.copy()
+          new_value["attribute_object"] = attribute_object
+          new_value["attribute_object_id"] = attribute_object.get("id")
+          result.append(new_value)
+          actual_values_map_ids.add(
+              (
+                  new_value.get("custom_attribute_id"),
+                  new_value.get("attribute_object_id"),
+              )
+          )
+      elif value.get("attribute_value") == "":
+        new_value = value.copy()
+        new_value["attribute_object"] = None
+        new_value["attribute_object_id"] = 0
+        result.append(new_value)
+        actual_values_map_ids.add(
+            (
+                new_value.get("custom_attribute_id"),
+                new_value.get("attribute_object_id"),
+            )
+        )
 
-    self._values_map = {
-        value.custom_attribute_id or value.custom_attribute.id: value
-        for value in self.custom_attribute_values
-    }
-    # pylint: disable=not-an-iterable
-    self._definitions_map = {
-        definition.id: definition
-        for definition in self.custom_attribute_definitions
-    }
-    # pylint: enable=not-an-iterable
+    cav_keys = list(set(self._values_map) - actual_values_map_ids)
+    for cav_key in cav_keys:
+      # finding cavs to delete
+      cav = self._values_map.get(cav_key)
+      result.append({
+          "custom_attribute_id": cav.custom_attribute_id,
+          "attribute_object_id": cav.attribute_object_id,
+          "attribute_value": cav.attribute_value,
+          "attribute_object": None,
+      })
 
-    if isinstance(values[0], dict):
-      self._add_ca_value_dicts(values)
+    return result
+
+  def _complete_or_delete(self, attr, value):
+    """
+    Delete cav if it has mapping and has't attribute_object
+    Complete when we don't need to delete
+
+    Args:
+      attr: cav to complete of delete
+      value: dict related to cav
+    """
+    if attr.attribute_value and not value.get("attribute_object"):
+      db.session.delete(attr)
+      db.session.commit()
     else:
-      self._add_ca_values(values)
+      attr.attributable = self
+      attr.attribute_value = value.get("attribute_value")
+      attr.attribute_object_id = value.get("attribute_object_id")
 
-  def _add_ca_values(self, values):
-    """Add CA value objects to _custom_attributes_values property.
+  def _create_cav(self, value):
+    """
+    Creating cav
 
     Args:
-      values: list of CustomAttributeValue models
+      value: cav value
+
+    Raises:
+      BadRequest: cav value is invalid
     """
-    for new_value in values:
-      existing_value = self._values_map.get(new_value.custom_attribute.id)
-      if existing_value:
-        existing_value.attribute_value = new_value.attribute_value
-        existing_value.attribute_object_id = new_value.attribute_object_id
-      else:
-        new_value.attributable = self
-        # new_value is automatically appended to self._custom_attribute_values
-        # on new_value.attributable = self
+    from ggrc.utils import referenced_objects
+    from ggrc.models.custom_attribute_value import CustomAttributeValue
+    # this is automatically appended to self._custom_attribute_values
+    # on attributable=self
+    custom_attribute_id = value.get("custom_attribute_id")
+    custom_attribute = referenced_objects.get(
+        "CustomAttributeDefinition", custom_attribute_id
+    )
+    attribute_object = value.get("attribute_object")
+    if attribute_object is None:
+      CustomAttributeValue(
+          attributable=self,
+          custom_attribute=custom_attribute,
+          custom_attribute_id=custom_attribute_id,
+          attribute_value=value.get("attribute_value"),
+          attribute_object_id=value.get("attribute_object_id"),
+      )
+    elif isinstance(attribute_object, dict):
+      attribute_object_type = attribute_object.get("type")
+      attribute_object_id = attribute_object.get("id")
+
+      attribute_object = referenced_objects.get(
+          attribute_object_type, attribute_object_id
+      )
+
+      cav = CustomAttributeValue(
+          attributable=self,
+          custom_attribute=custom_attribute,
+          custom_attribute_id=custom_attribute_id,
+          attribute_value=value.get("attribute_value"),
+          attribute_object_id=value.get("attribute_object_id"),
+      )
+      cav.attribute_object = attribute_object
+    else:
+      raise BadRequest("Bad custom attribute value inserted")
 
   def _add_ca_value_dicts(self, values):
     """Add CA dict representations to _custom_attributes_values property.
@@ -216,60 +388,16 @@ class CustomAttributable(object):
     Args:
       values: List of dictionaries that represent custom attribute values.
     """
-    from ggrc.utils import referenced_objects
-    from ggrc.models.custom_attribute_value import CustomAttributeValue
-
     for value in values:
-      # TODO: decompose to smaller methods
       # TODO: remove complicated nested conditions, better to use
       # instant exception raising
-      if not value.get("attribute_object_id"):
-        # value.get("attribute_object", {}).get("id") won't help because
-        # value["attribute_object"] can be None
-        value["attribute_object_id"] = (value["attribute_object"].get("id") if
-                                        value.get("attribute_object") else
-                                        None)
-
-      attr = self._values_map.get(value.get("custom_attribute_id"))
+      attr = self._values_map.get(
+          (value.get("custom_attribute_id"), value.get("attribute_object_id"))
+      )
       if attr:
-        attr.attributable = self
-        attr.attribute_value = value.get("attribute_value")
-        attr.attribute_object_id = value.get("attribute_object_id")
+        self._complete_or_delete(attr, value)
       elif "custom_attribute_id" in value:
-        # this is automatically appended to self._custom_attribute_values
-        # on attributable=self
-        custom_attribute_id = value.get("custom_attribute_id")
-        custom_attribute = referenced_objects.get(
-            "CustomAttributeDefinition", custom_attribute_id
-        )
-        attribute_object = value.get("attribute_object")
-
-        if attribute_object is None:
-          CustomAttributeValue(
-              attributable=self,
-              custom_attribute=custom_attribute,
-              custom_attribute_id=custom_attribute_id,
-              attribute_value=value.get("attribute_value"),
-              attribute_object_id=value.get("attribute_object_id"),
-          )
-        elif isinstance(attribute_object, dict):
-          attribute_object_type = attribute_object.get("type")
-          attribute_object_id = attribute_object.get("id")
-
-          attribute_object = referenced_objects.get(
-              attribute_object_type, attribute_object_id
-          )
-
-          cav = CustomAttributeValue(
-              attributable=self,
-              custom_attribute=custom_attribute,
-              custom_attribute_id=custom_attribute_id,
-              attribute_value=value.get("attribute_value"),
-              attribute_object_id=value.get("attribute_object_id"),
-          )
-          cav.attribute_object = attribute_object
-        else:
-          raise BadRequest("Bad custom attribute value inserted")
+        self._create_cav(value)
       elif "href" in value:
         # Ignore setting of custom attribute stubs. Getting here means that the
         # front-end is not using the API correctly and needs to be updated.
@@ -432,7 +560,7 @@ class CustomAttributable(object):
 
     This method returns custom attribute definitions for entire class. Returned
     definitions can be filtered by providing `field_names` or `attributable_id`
-    argumetns. Note, that providing this arguments also improves performance.
+    arguments. Note, that providing this arguments also improves performance.
     Avoid getting all possible attribute definitions if possible.
 
     Args:
@@ -514,15 +642,6 @@ class CustomAttributable(object):
 
     return res
 
-  def validate_custom_attributes(self):
-    """Set CADs and validate CAVs one by one."""
-    # pylint: disable=not-an-iterable; we can iterate over relationships
-    map_ = {d.id: d for d in self.custom_attribute_definitions}
-    for value in self._custom_attribute_values:
-      if not value.custom_attribute and value.custom_attribute_id:
-        value.custom_attribute = map_.get(int(value.custom_attribute_id))
-      value.validate()
-
   @builder.simple_property
   def preconditions_failed(self):
     """Returns True if any mandatory CAV, comment or evidence is missing.
@@ -545,37 +664,28 @@ class CustomAttributable(object):
     return any(c.preconditions_failed
                for c in self.custom_attribute_values)
 
-  def check_mandatory_requirement(self, requirement):
-    """Check presence of mandatory requirement like evidence or URL.
 
-    Note:  mandatory requirement precondition is checked only once.
-    Any additional changes to evidences or URL after the first checking
-    of the precondition will cause incorrect result of the function.
+class CustomAttributeMapable(object):
+  # pylint: disable=too-few-public-methods
+  # because this is a mixin
+  """Mixin. Setup for models that can be mapped as CAV value."""
+
+  @declared_attr
+  def related_custom_attributes(cls):  # pylint: disable=no-self-argument
+    """CustomAttributeValues that directly map to this object.
+
+    Used just to get the backrefs on the CustomAttributeValue object.
+
+    Returns:
+       a sqlalchemy relationship
     """
-    from ggrc.models.mixins.with_evidence import WithEvidence
-    if isinstance(self, WithEvidence):
+    from ggrc.models.custom_attribute_value import CustomAttributeValue
 
-      if self._requirement_cache is None:
-        self._requirement_cache = {}
-      if requirement not in self._requirement_cache:
-        required = 0
-        for cav in self.custom_attribute_values:
-          flags = cav.multi_choice_options_to_flags(cav.custom_attribute) \
-                     .get(cav.attribute_value)
-          if flags and flags.get(requirement):
-            required += 1
-
-        fitting = {
-            "evidence": len(self.evidences_file),
-            "url": len(self.evidences_url),
-        }
-        self._requirement_cache[requirement] = fitting[requirement] >= required
-
-      if not self._requirement_cache[requirement]:
-        return [requirement]
-
-    return []
-
-  def invalidate_evidence_found(self):
-    """Invalidate the cached value"""
-    self._requirement_cache = None
+    return db.relationship(
+        'CustomAttributeValue',
+        primaryjoin=lambda: (
+            (CustomAttributeValue.attribute_value == cls.__name__) &
+            (CustomAttributeValue.attribute_object_id == cls.id)),
+        foreign_keys="CustomAttributeValue.attribute_object_id",
+        backref='attribute_{0}'.format(cls.__name__),
+        viewonly=True)

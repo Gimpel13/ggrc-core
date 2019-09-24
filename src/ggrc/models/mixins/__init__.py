@@ -19,6 +19,7 @@ color
 from logging import getLogger
 from uuid import uuid1
 import datetime
+import re
 
 from sqlalchemy import event
 from sqlalchemy import orm
@@ -32,6 +33,8 @@ from ggrc.models import reflection
 from ggrc.models import exceptions
 from ggrc.models.deferred import deferred
 from ggrc.models.mixins.customattributable import CustomAttributable
+from ggrc.models.mixins.external_customattributable \
+    import ExternalCustomAttributable
 from ggrc.models.mixins.notifiable import Notifiable
 from ggrc.models.mixins.base import Base
 from ggrc.models.utils import validate_option
@@ -60,7 +63,7 @@ class Titled(object):
     if value is None:
       raise ValueError("'title' must be specified")
 
-    return value.strip()
+    return re.sub(r"\s+", " ", value).strip()
 
   title = db.Column(db.String, nullable=False)
 
@@ -752,9 +755,16 @@ class WithNetworkZone(object):
   _fulltext_attrs = [
       "network_zone",
   ]
+  NZ_OPTIONS = ("Service",
+                "Core",
+                "3rd Party",
+                "Prod",
+                "Corp")
   _aliases = {
       "network_zone": {
           "display_name": "Network Zone",
+          "description": "Allowed values are:\n{}".format(
+              "\n".join(NZ_OPTIONS)),
       },
   }
 
@@ -765,6 +775,7 @@ class WithNetworkZone(object):
 
   @classmethod
   def eager_query(cls, **kwargs):
+    """Eager query."""
     query = super(WithNetworkZone, cls).eager_query(**kwargs)
     return query.options(
         orm.joinedload(
@@ -776,6 +787,7 @@ class WithNetworkZone(object):
 
   @classmethod
   def indexed_query(cls):
+    """Indexed query."""
     query = super(WithNetworkZone, cls).indexed_query()
     return query.options(
         orm.joinedload(
@@ -858,6 +870,7 @@ __all__ = [
     "Base",
     "BusinessObject",
     "CustomAttributable",
+    "ExternalCustomAttributable",
     "Described",
     "FinishedDate",
     "Noted",

@@ -129,12 +129,10 @@ class Assessment(Assignable, statusable.Statusable, AuditRelationship,
 
   object = {}  # we add this for the sake of client side error checking
 
-  VALID_CONCLUSIONS = frozenset([
-      "Effective",
-      "Ineffective",
-      "Needs improvement",
-      "Not Applicable"
-  ])
+  VALID_CONCLUSIONS = ("Effective",
+                       "Ineffective",
+                       "Needs improvement",
+                       "Not Applicable")
 
   # REST properties
   _api_attrs = reflection.ApiAttributes(
@@ -198,29 +196,28 @@ class Assessment(Assignable, statusable.Statusable, AuditRelationship,
     out_json = super(Assessment, self).log_json()
     out_json["folder"] = self.folder
     return out_json
-  ASSESSMENT_TYPE_OPTIONS = ("AccessGroup",
-                             "AccountBalance",
-                             "Contract",
-                             "Control",
-                             "DataAsset",
-                             "Facility",
-                             "Market",
-                             "Objective",
-                             "OrgGroup",
-                             "Policy",
-                             "Process",
-                             "Product",
-                             "Regulation",
-                             "Requirement",
-                             "Standard",
-                             "System",
-                             "Vendor",
-                             "Risk",
-                             "TechnologyEnvironment",
-                             "Threat",
-                             "Metric",
-                             "ProductGroup",
-                             "KeyReport"
+  ASSESSMENT_TYPE_OPTIONS = ("Access Groups",
+                             "Account Balances",
+                             "Data Assets",
+                             "Facilities",
+                             "Key Reports",
+                             "Markets",
+                             "Org Groups",
+                             "Processes",
+                             "Product Groups",
+                             "Products",
+                             "Systems",
+                             "Technology Environments",
+                             "Vendors",
+                             "Contracts",
+                             "Controls",
+                             "Objectives",
+                             "Policies",
+                             "Regulations",
+                             "Requirements",
+                             "Risks",
+                             "Standards",
+                             "Threats",
                              )
   _aliases = {
       "owners": None,
@@ -233,16 +230,25 @@ class Assessment(Assignable, statusable.Statusable, AuditRelationship,
       "assessment_type": {
           "display_name": "Assessment Type",
           "mandatory": False,
-          "description": "Options are:\n{}".format(
+          "description": "Allowed values are:\n{}".format(
               '\n'.join(ASSESSMENT_TYPE_OPTIONS)),
       },
-      "design": "Conclusion: Design",
-      "operationally": "Conclusion: Operation",
+      "design": {
+          "display_name": "Conclusion: Design",
+          "description": "Allowed values are:\n{}".format(
+              '\n'.join(VALID_CONCLUSIONS)),
+      },
+      "operationally": {
+          "display_name": "Conclusion: Operation",
+          "description": "Allowed values are:\n{}".format(
+              '\n'.join(VALID_CONCLUSIONS)),
+      },
       "archived": {
           "display_name": "Archived",
           "mandatory": False,
           "ignore_on_update": True,
           "view_only": True,
+          "description": "Allowed values are:\nyes\nno"
       },
       "test_plan": "Assessment Procedure",
       # Currently we decided to have 'Due Date' alias for start_date,

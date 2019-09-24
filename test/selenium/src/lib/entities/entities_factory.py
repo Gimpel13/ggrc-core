@@ -327,6 +327,8 @@ class CustomAttributeDefinitionsFactory(EntitiesFactory):
     else:
       attrs["multi_choice_options"] = None
     attrs.setdefault("mandatory", False)
+    if attrs["definition_type"] in objects.EXTERNAL_END_POINTS:
+      attrs["id"] = self.generate_external_id()
     obj = self.obj_inst()
     obj.update_attrs(is_allow_none=False, **attrs)
     if is_add_rest_attrs:
@@ -760,3 +762,35 @@ class StandardsFactory(EntitiesFactory):
   def _create_random_obj(self, is_add_rest_attrs):
     """Creates Standard entity."""
     return self.obj_inst().update_attrs(title=self.obj_title)
+
+
+class RegulationsFactory(EntitiesFactory):
+  """Factory class for regulations."""
+
+  def __init__(self):
+    super(RegulationsFactory, self).__init__(objects.REGULATIONS)
+    self._acl_roles = [
+        ("admins", roles.ACLRolesIDs.REGULATION_ADMINS,
+         [users.current_user()])
+    ]
+
+  def _create_random_obj(self, is_add_rest_attrs):
+    """Create regulation entity."""
+    return self.obj_inst().update_attrs(
+        title=self.obj_title)
+
+
+class RequirementsFactory(EntitiesFactory):
+  """Factory class for requirements."""
+
+  def __init__(self):
+    super(RequirementsFactory, self).__init__(objects.REQUIREMENTS)
+    self._acl_roles = [
+        ("admins", roles.ACLRolesIDs.REQUIREMENT_ADMINS,
+         [users.current_user()])
+    ]
+
+  def _create_random_obj(self, is_add_rest_attrs):
+    """Create requirement entity."""
+    return self.obj_inst().update_attrs(
+        title=self.obj_title)

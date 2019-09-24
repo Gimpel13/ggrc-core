@@ -21,13 +21,14 @@ from ggrc.models import mixins
 from ggrc.models import reflection
 from ggrc.models import relationship
 from ggrc.models import revision
-from ggrc.models.deferred import deferred
 from ggrc.models.mixins import base
 from ggrc.models.mixins import rest_handable
 from ggrc.models.mixins import with_last_assessment_date
 from ggrc.models.mixins.synchronizable import Synchronizable
 from ggrc.utils import benchmark
 from ggrc.utils import errors
+from ggrc.utils import referenced_objects
+from ggrc.utils.revisions_diff import builder as revisions_diff
 
 
 class Snapshot(rest_handable.WithDeleteHandable,
@@ -60,6 +61,8 @@ class Snapshot(rest_handable.WithDeleteHandable,
       reflection.Attribute("original_object_deleted",
                            create=False,
                            update=False),
+      reflection.Attribute("is_identical_revision", create=False,
+                           update=False),
       reflection.Attribute("update_revision", read=False),
   )
 
@@ -75,18 +78,12 @@ class Snapshot(rest_handable.WithDeleteHandable,
       }
   }
 
-  parent_id = deferred(
-      db.Column(
-          db.Integer,
-          db.ForeignKey("audits.id", ondelete='CASCADE'),
-          nullable=False
-      ),
-      "Snapshot",
+  parent_id = db.Column(
+      db.Integer,
+      db.ForeignKey("audits.id", ondelete='CASCADE'),
+      nullable=False,
   )
-  parent_type = deferred(
-      db.Column(db.String, nullable=False, default="Audit"),
-      "Snapshot",
-  )
+  parent_type = db.Column(db.String, nullable=False, default="Audit")
 
   @orm.validates("parent_type")
   def validate_parent_type(self, _, value):
@@ -100,17 +97,20 @@ class Snapshot(rest_handable.WithDeleteHandable,
   # them from revision.content, but since that is a JSON field it will be
   # easier for development to just denormalise on write and not worry
   # about it.
-  child_id = deferred(db.Column(db.Integer, nullable=False), "Snapshot")
-  child_type = deferred(db.Column(db.String, nullable=False), "Snapshot")
+  child_id = db.Column(db.Integer, nullable=False)
+  child_type = db.Column(db.String, nullable=False)
 
-  revision_id = deferred(db.Column(
+  revision_id = db.Column(
       db.Integer,
       db.ForeignKey("revisions.id"),
       nullable=False
-  ), "Snapshot")
+  )
+
   revision = db.relationship(
       "Revision",
+      lazy="joined",
   )
+
   _update_revision = None
 
   revisions = db.relationship(
@@ -141,11 +141,22 @@ class Snapshot(rest_handable.WithDeleteHandable,
     )
     return bool(deleted or external_deleted)
 
+  @builder.simple_property
+  def is_identical_revision(self):
+    """Flag if the snapshot has the identical revision."""
+    instance = referenced_objects.get(self.child_type, self.child_id)
+    return self.revisions and revisions_diff.is_identical_revision(
+        instance,
+        self.revision.content,
+        self.revisions[-1].content
+    )
+
   @classmethod
   def eager_query(cls, **kwargs):
     query = super(Snapshot, cls).eager_query(**kwargs)
     return cls.eager_inclusions(query, Snapshot._include_links).options(
-        orm.subqueryload('revision'),
+        # Revision is loaded here with event's action for performance purpose.
+        orm.subqueryload('revision').joinedload('event').load_only('action'),
         orm.subqueryload('revisions'),
         orm.joinedload('audit').load_only("id", "archived"),
     )

@@ -5,8 +5,10 @@ Reasons for a facade:
 * It is not very convenient to use
 * More high level functions are often needed
 """
+import re
+
 from lib import factory, decorator, users
-from lib.constants import roles, objects, element
+from lib.constants import roles, objects, element, value_aliases
 from lib.entities import entities_factory
 from lib.entities.entity import Representation
 from lib.service import rest_service
@@ -16,6 +18,16 @@ from lib.utils import date_utils
 def create_program(**attrs):
   """Create a program"""
   return rest_service.ProgramsService().create_obj(factory_params=attrs)
+
+
+def create_requirement(program=None, **attrs):
+  """Create a requirement."""
+  return _create_obj_in_program_scope(objects.REQUIREMENTS, program, **attrs)
+
+
+def create_regulation(program=None, **attrs):
+  """Create a regulation."""
+  return _create_obj_in_program_scope(objects.REGULATIONS, program, **attrs)
 
 
 def create_objective(program=None, **attrs):
@@ -99,7 +111,9 @@ def create_asmts_from_template(audit, asmt_template, objs_to_map):
 
 def create_gcad(**attrs):
   """Creates global CADs for all types."""
-  return rest_service.CustomAttributeDefinitionsService().create_obj(
+  return rest_service.CustomAttributeDefinitionsService(
+      is_external=True if (objects.get_plural(attrs["definition_type"])
+                           in objects.EXTERNAL_OBJECTS) else False).create_obj(
       factory_params=attrs)
 
 
@@ -107,7 +121,8 @@ def create_gcads_for_control():
   """Creates global CADs for all types."""
   return [create_gcad(definition_type="control",
                       attribute_type=ca_type)
-          for ca_type in element.AdminWidgetCustomAttributes.ALL_GCA_TYPES]
+          for ca_type
+          in element.AdminWidgetCustomAttributes.ALL_EXTERNAL_GCA_TYPES]
 
 
 def create_issue(obj=None):
@@ -248,3 +263,18 @@ def approve_obj_review(obj):
           last_reviewed_by=users.current_user().email,
           last_reviewed_at=date_utils.iso8601_to_ui_str_with_zone(
               rest_review.last_reviewed_at)))
+
+
+def cas_dashboards(obj, *urls):
+  """Creates 'Dashboard' CAs for obj and fill them with provided urls.
+  Returns: dict with dashboard tab items names as a keys and urls as a values.
+  """
+  cads_rest_service = rest_service.CustomAttributeDefinitionsService()
+  gca_defs = cads_rest_service.create_dashboard_gcas(obj.type, count=len(urls))
+  factory.get_cls_rest_service(objects.get_plural(obj.type))().update_obj(
+      obj=obj,
+      custom_attributes=dict(zip([gca_def.id for gca_def in gca_defs], urls)))
+  valid_dashboard_url_pattern = re.compile(r"^https?://[^\s]+$")
+  valid_urls = [i for i in urls if re.match(valid_dashboard_url_pattern, i)]
+  return dict(zip([gca_def.title.replace(value_aliases.DASHBOARD + "_", "")
+                   for gca_def in gca_defs], valid_urls))

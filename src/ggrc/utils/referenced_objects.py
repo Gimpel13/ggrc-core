@@ -11,9 +11,10 @@ from sqlalchemy import orm
 from ggrc import db
 from ggrc.models import inflector
 from ggrc.models.mixins import customattributable as ca
+from ggrc.models.mixins import external_customattributable as e_ca
 
 
-def get(type_, id_):
+def get(type_, id_, raise_exception=False):
   """Check flask.g.referenced_objects for the object or get it from the DB."""
   # id == 0 is a valid case if id is an int; therefore "not id" doesn't fit
   if id_ is None:
@@ -30,6 +31,10 @@ def get(type_, id_):
 
   if not result:
     result = type_.query.get(id_)
+
+  if not result and raise_exception:
+    raise ValueError("No {} with id {} found."
+                     .format(type_, id_))
 
   return result
 
@@ -115,6 +120,14 @@ def _skip_cads(type_, query, skip_cad=False, **_):
             "custom_attribute_definitions"
         ).undefer_group(
             "CustomAttributeDefinition_complete"
+        )
+    )
+  if issubclass(type_, e_ca.ExternalCustomAttributable) and not skip_cad:
+    query = query.options(
+        orm.Load(type_).subqueryload(
+            "custom_attribute_definitions"
+        ).undefer_group(
+            "ExternalCustomAttributeDefinition_complete"
         )
     )
   return query

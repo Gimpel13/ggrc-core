@@ -102,7 +102,7 @@ class TestSnapshots(base.Test):
           ("create_audit_with_control_with_cas_and_update_control_cav",
            "control", True, True),
           ("create_audit_with_control_with_cas_and_delete_cas_for_controls",
-           "control", True, True)],
+           "control", True, False)],
       ids=["Audit contains snapshotable Control after updating Control",
            "Audit contains snapshotable Control after deleting Control",
            "Audit contains snapshotable Control "
@@ -111,7 +111,8 @@ class TestSnapshots(base.Test):
            "after deleting CAs for Controls"],
       indirect=["obj"])
   def test_destructive_audit_contains_snapshotable_control(
-      self, obj, expected_control, is_openable, is_updateable, selenium
+      self, login_as_creator, obj, expected_control, is_openable,
+      is_updateable, selenium
   ):
     """Test snapshotable Control and check via UI that:
     - Audit contains snapshotable Control after updating Control.
@@ -537,15 +538,12 @@ class TestSnapshots(base.Test):
   @pytest.mark.xfail(raises=IOError)
   @pytest.mark.parametrize(
       "obj",
-      [pytest.param(
-          None, marks=pytest.mark.skip(reason="TBD")),
+      [pytest.param(None),
        pytest.param(
           "assessment_w_mapped_control_w_issue",
           marks=pytest.mark.skip(
               reason="Issue has another mapping flow to control")),
-       pytest.param(
-           "assessment_w_mapped_control_wo_issue",
-           marks=pytest.mark.skip(reason="TBD"))],
+       pytest.param("assessment_w_mapped_control_wo_issue")],
       ids=["Export of snapshoted Control from Audit's Info Page "
            "via mapped Controls' Tree View",
            "Export of snapshoted Control from Issue's Info Page "
@@ -573,12 +571,11 @@ class TestSnapshots(base.Test):
         (obj["issue"] if is_issue_flow else obj["assessment"]) if obj
         else audit_with_one_control["audit"])
     expected_control = audit_with_one_control["control"].repr_ui()
-    controls_ui_service = webui_service.ControlsService(
-        selenium, is_versions_widget=is_issue_flow)
-    path_to_exported_file = controls_ui_service.export_objs_via_tree_view(
-        path_to_export_dir=create_tmp_dir, src_obj=dynamic_objects)
-    actual_controls = controls_ui_service.get_list_objs_from_csv(
-        path_to_exported_file=path_to_exported_file)
+    actual_controls = webui_facade.export_objects(
+        path_to_export_dir=create_tmp_dir,
+        obj_type=audit_with_one_control["control"].type,
+        src_obj=dynamic_objects,
+        is_versions_widget=is_issue_flow)
     # 'actual_controls': created_at, updated_at,
     #                    custom_attributes (GGRC-2344) (None)
     self.general_equal_assert(
@@ -774,3 +771,32 @@ class TestSnapshots(base.Test):
         selenium, webui_facade.create_audit(
             selenium, program, manual_snapshots=True))
     assert actual_count == {"controls_tab_count": 0, "controls_count": 0}
+
+  @pytest.mark.parametrize(
+      'obj_mapped_to_control',
+      ["requirement_mapped_to_program", "regulation_mapped_to_program"],
+      indirect=True)
+  @pytest.mark.parametrize(
+      'obj',
+      ["audit_w_manually_mapped_control_and_obj_mapped_to_control", "audit"],
+      indirect=True)
+  def test_related_snapshots_in_control_snapshot_info_modal(
+      self, control_mapped_to_program, obj_mapped_to_control, obj,
+      asmt_w_control_snapshot, selenium
+  ):
+    """Check that snapshot which is related to control snapshot is shown in
+    'SHOW RELATED' section of control snapshot info modal.
+    Preconditions:
+    - Program with mapped Control
+    - Audit with manually/auto mapped Control snapshot
+    - Regulation/Requirement mapped to the Program and Control
+    - Regulation/Requirement snapshot mapped to Audit
+    - Assessment for Audit with a Control snapshot
+    """
+    related_objs = (webui_service.AssessmentsService(selenium)
+                    .get_snapshots_which_are_related_to_control_snapshot(
+        asmt_w_control_snapshot, control_mapped_to_program,
+        obj_mapped_to_control.type))
+    self.general_contain_assert(
+        obj_mapped_to_control, related_objs, 'status', 'modified_by',
+        'slug', *obj_mapped_to_control.tree_view_attrs_to_exclude)

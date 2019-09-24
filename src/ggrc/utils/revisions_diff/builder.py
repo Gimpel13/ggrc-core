@@ -147,7 +147,7 @@ def get_validated_value(cad, value, object_id):
     value = value.strip()
     return value, object_id
   if cad.attribute_type == cad.ValidTypes.CHECKBOX:
-    value = int(value)
+    value = int(value) if value is not None else None
   if value is not None:
     value = unicode(value)
   return value, object_id
@@ -325,6 +325,36 @@ def prepare(instance, content):
       current_content=current_data,
       new_content=content,
   )
+
+
+def is_identical_acr(instance, value_1, value_2):
+  """Checks acls for identity"""
+  meta = meta_info.MetaInfo(instance)
+  result = generate_acl_diff(meta.acrs, value_1, value_2)
+  return len(result) == 0
+
+
+def is_identical_revision(instance, context_1, context_2):
+  """Checks revisions contexts for identity."""
+  attr_to_exclude = 'updated_at'
+  attr_need_prepare = 'access_control_list'
+  context_1, context_2 = (context_1, context_2) if \
+      len(context_1.keys()) > len(context_2.keys()) else \
+      (context_2, context_1)
+
+  for key, value in context_1.items():
+    if key == attr_to_exclude:
+      continue
+
+    if key not in context_2 and value:
+      return False
+    elif key == attr_need_prepare:
+      is_identical = is_identical_acr(instance, value, context_2.get(key, []))
+      if not is_identical:
+        return False
+    elif key in context_2 and context_2[key] != value:
+      return False
+  return True
 
 
 def prepare_content_full_diff(instance_meta_info, l_content, r_content):
