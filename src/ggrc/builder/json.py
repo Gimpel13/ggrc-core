@@ -558,6 +558,7 @@ class Builder(AttributeInfo):
     """
     # FIXME: Remove the "if o is not None" when we can guarantee referential
     #   integrity
+    # import pdb; pdb.set_trace()
     return [
         self.generate_link_object_for(o, inclusions, include, inclusion_filter)
         for o in join_objects if o is not None]
@@ -623,7 +624,10 @@ class Builder(AttributeInfo):
           inclusion_filter):
     uselist = class_attr.property.uselist
     if uselist:
-      join_objects = getattr(obj, attr_name)
+      if attr_name == "custom_attribute_values":
+        join_objects = obj._custom_attributes_groupby_custom_attribute
+      else:
+        join_objects = getattr(obj, attr_name)
       return self.publish_link_collection(
           join_objects, inclusions, include, inclusion_filter)
     elif include or class_attr.property.backref:

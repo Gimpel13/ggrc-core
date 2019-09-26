@@ -244,6 +244,8 @@ class CustomAttributeValue(CustomAttributeValueBase):
         CustomAttributeValue.attribute_value == "Person",
         CustomAttributeValue.custom_attribute_id == self.custom_attribute_id,
         CustomAttributeValue.attributable_id == self.attributable_id,
+    ).order_by(
+        CustomAttributeValue.created_at,
     ).all()
 
   @property
@@ -560,5 +562,6 @@ class CustomAttributeValue(CustomAttributeValueBase):
     if self.attribute_object_id is not None and \
        self._attribute_object_attr is not None:
       res["attribute_object"] = self.attribute_object
+      res["attribute_objects"] = self.attribute_objects
 
     return res

@@ -208,6 +208,11 @@ class CustomAttributable(CustomAttributableBase):
         order_by="CustomAttributeDefinition.id"
     )
 
+  @property
+  def _custom_attributes_groupby_custom_attribute(self):
+    cavs = self.custom_attribute_values
+    return {cav.custom_attribute_id: cav for cav in cavs}.values()
+
   @declared_attr
   def _custom_attribute_values(cls):  # pylint: disable=no-self-argument
     """Load custom attribute values"""
@@ -619,11 +624,18 @@ class CustomAttributable(CustomAttributableBase):
     from ggrc.models.custom_attribute_definition import \
         CustomAttributeDefinition
 
+    # import pdb; pdb.set_trace()
     res = super(CustomAttributable, self).log_json()
 
     if self.custom_attribute_values:
+
+      self._values_map_by_custom_attribute = {
+          value.custom_attribute_id: value
+          for value in self.custom_attribute_values
+      }
+
       res["custom_attribute_values"] = [
-          value.log_json() for value in self.custom_attribute_values]
+          value.log_json() for value in self._values_map_by_custom_attribute.values()]
       # fetch definitions form database because `self.custom_attribute`
       # may not be populated
       defs = CustomAttributeDefinition.query.filter(
