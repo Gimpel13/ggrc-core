@@ -9,12 +9,9 @@ from sqlalchemy.ext import declarative as sa_declarative
 from ggrc import db
 from ggrc.fulltext import attributes
 from ggrc.models import reflection
-from ggrc.models.mixins import customattributable
-from ggrc.models.mixins import rest_handable
-from ggrc.models.mixins import statusable
 
 
-class WithSOX302Flow(rest_handable.WithPutBeforeCommitHandable):
+class WithSOX302Flow(object):  # pylint: disable=too-few-public-methods
   """Mixin which adds a support of SOX 302 flow."""
 
   @sa_declarative.declared_attr
@@ -51,17 +48,22 @@ class WithSOX302Flow(rest_handable.WithPutBeforeCommitHandable):
 
   @classmethod
   def indexed_query(cls):
+<<<<<<< HEAD
     """Return DB query used for object indexing.
 
     Here `sox_302_enabled` is added to sqlalchemy query constructed during
     `super` call to allow indexing and thus search of objects by this field.
     """
+=======
+    """Return DB query used for object indexing."""
+>>>>>>> Add SOX302 flag for asmt tmpl
     query = super(WithSOX302Flow, cls).indexed_query()
     return query.options(
         sa_orm.Load(cls).load_only(
             "sox_302_enabled",
         ),
     )
+<<<<<<< HEAD
 
   def _has_negative_cavs(self):
     """Check if current object has any CAVs with values marked as negative."""
@@ -144,3 +146,5 @@ class WithSOX302FlowReadOnly(WithSOX302Flow):
   _api_attrs = reflection.ApiAttributes(
       reflection.Attribute('sox_302_enabled', create=False, update=False),
   )
+=======
+>>>>>>> Add SOX302 flag for asmt tmpl
