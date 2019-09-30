@@ -355,8 +355,10 @@ function getCustomAttributes(instance, type) {
  */
 function setCustomAttributeValue(ca, value) {
   if (ca.attr('attributeType') === 'person') {
+    const valueWithoutUselessProps =
+      loMap(value, ({id}) => ({id, type: 'Person'}));
     const attributeObjects =
-      value ? loMap(value, ({id}) => ({id, type: 'Person'})) : null;
+      (value && value.length) ? valueWithoutUselessProps : null;
     ca.attr('attribute_value', 'Person');
     ca.attr('attribute_objects', attributeObjects);
   } else {
