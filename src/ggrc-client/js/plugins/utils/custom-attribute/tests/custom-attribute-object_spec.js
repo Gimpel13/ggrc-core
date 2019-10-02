@@ -104,19 +104,20 @@ describe('CustomAttributeObject module', () => {
     });
 
     describe('when caObject has Person type', function () {
-      it('returns person id if custom attribute object has "id"', function () {
+      it('returns attributes_objects without objects which' +
+        'does not have "id" property', function () {
         caDef.attr('attribute_type', caDefTypeName.MapPerson);
-        const id = 345;
-        caValue.attr('attribute_object', {id});
-        expect(caObject.value).toBe(id);
+        caValue.attr('attribute_objects',
+          [{email: 345}, {id: 1}, {name: 'Nick'}]);
+        expect(caObject.value.length).toBe(1);
+        expect(caObject.value[0].id).toBe(1);
       });
 
-      it('returns "null" if custom attribute object doesn\'t have "id"',
-        function () {
-          caDef.attr('attribute_type', caDefTypeName.MapPerson);
-          caValue.attr('attribute_object', {email: 345});
-          expect(caObject.value).toBeNull();
-        });
+      it('returns "null" if attribute_objects empty', function () {
+        caDef.attr('attribute_type', caDefTypeName.MapPerson);
+        caValue.attr('attribute_objects', []);
+        expect(caObject.value).toBeNull();
+      });
     });
 
     it('returns custom attribute value', function () {
@@ -196,10 +197,10 @@ describe('CustomAttributeObject module', () => {
   });
 
   describe('attributeObject getter', () => {
-    it('returns custom attribute object', function () {
-      const attributeObject = new canMap();
-      caValue.attr('attribute_object', attributeObject);
-      expect(caObject.attributeObject).toBe(attributeObject);
+    it('returns custom attribute objects', function () {
+      const attributeObjects = [{id: 1}, {id: 2}];
+      caValue.attr('attribute_objects', attributeObjects);
+      expect(caObject.attributeObjects.attr()).toEqual(attributeObjects);
     });
   });
 
@@ -299,9 +300,9 @@ describe('CustomAttributeObject module', () => {
         caValue = new canMap();
       });
 
-      it('attribute_object field then set it to null', function () {
+      it('attribute_objects field then set it to null', function () {
         caObject._setupCaValue(caValue);
-        expect(caValue.attr('attribute_object')).toBeNull();
+        expect(caValue.attr('attribute_objects')).toBeNull();
       });
 
       it('attribute_value field then set it to result ' +
@@ -421,13 +422,42 @@ describe('CustomAttributeObject module', () => {
   describe('_prepareAttributeObject() method', () => {
     it('returns a stub for the person if custom attribute has ' +
     'caDefTypeName.MapPerson type', function () {
-      const stub = {
-        id: 12345,
+      const stub = [{
+        id: 1,
         type: 'Person',
-      };
+      }, {
+        id: 2,
+        type: 'Person',
+      }, {
+        id: 3,
+        type: 'Person',
+      }];
       caDef.attr('attribute_type', caDefTypeName.MapPerson);
-      const result = caObject._prepareAttributeObject(stub.id);
+      const result = caObject._prepareAttributeObjects(stub);
       expect(result).toEqual(stub);
+    });
+
+    it('returns a stub without objects which does not have id for the person' +
+     'if custom attribute has caDefTypeName.MapPerson type', function () {
+      const stub = [{
+        id: 1,
+        type: 'Person',
+      }, {
+        type: 'Person',
+      }, {
+        id: 3,
+        type: 'Person',
+      }];
+      const expectResult = [{
+        id: 1,
+        type: 'Person',
+      }, {
+        id: 3,
+        type: 'Person',
+      }];
+      caDef.attr('attribute_type', caDefTypeName.MapPerson);
+      const result = caObject._prepareAttributeObjects(stub);
+      expect(result).toEqual(expectResult);
     });
 
     it('returns default value if custom attribute has ' +
@@ -435,13 +465,13 @@ describe('CustomAttributeObject module', () => {
       const defValue = 'default value';
       caDef.attr('attribute_type', caDefTypeName.MapPerson);
       caDef.attr('default_value', defValue);
-      const result = caObject._prepareAttributeObject();
+      const result = caObject._prepareAttributeObjects();
       expect(result).toEqual(defValue);
     });
 
     it('returns null by default if custom attribute type is ' +
     'not recognizable', function () {
-      const result = caObject._prepareAttributeObject();
+      const result = caObject._prepareAttributeObjects();
       expect(result).toBeNull();
     });
 
@@ -454,7 +484,7 @@ describe('CustomAttributeObject module', () => {
       ];
       attrTypes.forEach((attrType) => {
         caDef.attr('attribute_type', attrType);
-        const result = caObject._prepareAttributeObject();
+        const result = caObject._prepareAttributeObjects();
         expect(result).toBeNull();
       });
     });
