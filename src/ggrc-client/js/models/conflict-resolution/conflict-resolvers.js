@@ -23,6 +23,7 @@ export function buildChangeDescriptor(
   return {
     hasConflict,
     isChangedLocally,
+    isChangedOnServer
   };
 }
 
@@ -37,12 +38,16 @@ export function simpleFieldResolver(
   let currentValue = loGet(attrs, key);
   let remoteValue = loGet(remoteAttrs, key);
 
-  let {hasConflict, isChangedLocally} = buildChangeDescriptor(
+  let {hasConflict, isChangedLocally, isChangedOnServer} = buildChangeDescriptor(
     previousValue,
     currentValue,
     remoteValue);
-
-  if (isChangedLocally) {
+  if(isChangedOnServer && isChangedLocally) {
+    let path = rootKey || key;
+    let currentRoot = loGet(remoteAttrs, path);
+    container.attr(path, currentRoot);
+  }
+  else if (isChangedLocally) {
     let path = rootKey || key;
     let currentRoot = loGet(attrs, path);
     container.attr(path, currentRoot);

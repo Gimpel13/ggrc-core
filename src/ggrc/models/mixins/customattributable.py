@@ -78,6 +78,7 @@ class CustomAttributableBase(object):
     }
     # pylint: enable=not-an-iterable
 
+    # import pdb; pdb.set_trace()
     if isinstance(values[0], dict):
       new_values = self._extend_values(values)
       self._add_ca_value_dicts(new_values)
@@ -210,8 +211,9 @@ class CustomAttributable(CustomAttributableBase):
 
   @property
   def _custom_attributes_groupby_custom_attribute(self):
-    cavs = self.custom_attribute_values
-    return {cav.custom_attribute_id: cav for cav in cavs}.values()
+    cavs = {cav.custom_attribute_id: cav for cav in self.custom_attribute_values}.values()
+    cavs.sort(key=lambda c: c.id)
+    return cavs
 
   @declared_attr
   def _custom_attribute_values(cls):  # pylint: disable=no-self-argument
@@ -282,46 +284,34 @@ class CustomAttributable(CustomAttributableBase):
       new values that contains extended list of cavs
     """
     result = []
-    actual_values_map_ids = set()
+    # actual_values_map_ids = set()
     for value in values:
-      if value.get("attribute_value") and isinstance(value.get("attribute_objects"), list):
+      if value.get("attribute_objects"):
         for attribute_object in value.get("attribute_objects"):
-          new_value = value.copy()
+          new_value = {}
           new_value["attribute_object"] = attribute_object
           new_value["attribute_object_id"] = attribute_object.get("id")
+          new_value["custom_attribute_id"] = value.get("custom_attribute_id")
+          new_value["attribute_value"] = value.get("attribute_value")
+
           result.append(new_value)
-          actual_values_map_ids.add(
-              (
-                  new_value.get("custom_attribute_id"),
-                  new_value.get("attribute_object_id"),
-              )
-          )
-      elif value.get("attribute_value") == "":
-        new_value = value.copy()
+      else:
+        new_value = {}
         new_value["attribute_object"] = None
         new_value["attribute_object_id"] = 0
+        new_value["custom_attribute_id"] = value.get("custom_attribute_id")
+        new_value["attribute_value"] = value.get("attribute_value")
         result.append(new_value)
-        actual_values_map_ids.add(
-            (
-                new_value.get("custom_attribute_id"),
-                new_value.get("attribute_object_id"),
-            )
-        )
-
-    cav_keys = list(set(self._values_map) - actual_values_map_ids)
-    for cav_key in cav_keys:
-      # finding cavs to delete
-      cav = self._values_map.get(cav_key)
-      result.append({
-          "custom_attribute_id": cav.custom_attribute_id,
-          "attribute_object_id": cav.attribute_object_id,
-          "attribute_value": cav.attribute_value,
-          "attribute_object": None,
-      })
 
     return result
 
-  def _complete_or_delete(self, attr, value):
+  def _delete_cavs(self, values):
+    keys = {(cav["custom_attribute_id"], cav["attribute_object_id"]) for cav in values}
+    cavs_to_delete = set(self._values_map.keys()) - keys
+    for key in cavs_to_delete:
+      db.session.delete(self._values_map[key])
+
+  def _complete_cav(self, attr, value):
     """
     Delete cav if it has mapping and has't attribute_object
     Complete when we don't need to delete
@@ -330,13 +320,9 @@ class CustomAttributable(CustomAttributableBase):
       attr: cav to complete of delete
       value: dict related to cav
     """
-    if attr.attribute_value and not value.get("attribute_object"):
-      db.session.delete(attr)
-      db.session.commit()
-    else:
-      attr.attributable = self
-      attr.attribute_value = value.get("attribute_value")
-      attr.attribute_object_id = value.get("attribute_object_id")
+    attr.attributable = self
+    attr.attribute_value = value.get("attribute_value")
+    attr.attribute_object_id = value.get("attribute_object_id")
 
   def _create_cav(self, value):
     """
@@ -400,7 +386,7 @@ class CustomAttributable(CustomAttributableBase):
           (value.get("custom_attribute_id"), value.get("attribute_object_id"))
       )
       if attr:
-        self._complete_or_delete(attr, value)
+        self._complete_cav(attr, value)
       elif "custom_attribute_id" in value:
         self._create_cav(value)
       elif "href" in value:
@@ -409,6 +395,7 @@ class CustomAttributable(CustomAttributableBase):
         logger.info("Ignoring post/put of custom attribute stubs.")
       else:
         raise BadRequest("Bad custom attribute value inserted")
+    self._delete_cavs(values)
 
   def insert_definition(self, definition):
     """Insert a new custom attribute definition into database

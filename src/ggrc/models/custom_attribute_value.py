@@ -228,39 +228,17 @@ class CustomAttributeValue(CustomAttributeValueBase):
       return None
 
   @property
-  def attribute_objects_person(self):
-    """
-    Fetch list of people who relate to this cav
-
-    Returns:
-      list of people related to current cav
-    """
-    from ggrc.models.person import Person
-
-    return db.session.query(Person).join(
-        CustomAttributeValue,
-        CustomAttributeValue.attribute_object_id == Person.id
-    ).filter(
-        CustomAttributeValue.attribute_value == "Person",
-        CustomAttributeValue.custom_attribute_id == self.custom_attribute_id,
-        CustomAttributeValue.attributable_id == self.attributable_id,
-    ).order_by(
-        CustomAttributeValue.created_at,
-    ).all()
-
-  @property
   def attribute_objects(self):
     """Get all objects mapped to attributable object with given cav
 
     Returns:
         list of mapped objects to attributable object
     """
-    # return getattr(self, "_attribute_objects", [])
-    if self.attribute_value:
-      return getattr(
-          self, "attribute_objects_{0}".format(self.attribute_value.lower())
-      )
-    return []
+    cavs = self.attributable.custom_attribute_values
+    res = [cav.attribute_object for cav in cavs
+           if cav.attribute_object and
+           cav.custom_attribute_id == self.custom_attribute_id]
+    return res
 
   @property
   def attribute_objects_id(self):

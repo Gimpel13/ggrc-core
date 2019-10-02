@@ -5,6 +5,8 @@
 
 import loMerge from 'lodash/merge';
 import loIsEqual from 'lodash/isEqual';
+import loFind from 'lodash/find';
+import loForEach from 'lodash/forEach';
 import {
   simpleFieldResolver,
   customAttributeResolver,
@@ -57,14 +59,17 @@ export default function resolveConflict(xhr, obj, remoteAttrs) {
 
   // merge current instance with remote attributes
   obj.attr(remoteAttrs);
-
+  // loForEach(obj.custom_attribute_values, (elD, index) => {
+  //   obj.custom_attribute_values[index].attribute_objects = 
+  //     (loFind(remoteAttrs.custom_attribute_values, (elV) => elD.custom_attribute_id === elV.custom_attribute_id)).attribute_objects;
+  // })
   // check what properties changed -- we can merge if the same prop wasn't changed on both
   let stillHasConflict =
     tryResolveConflictValues(baseAttrs, attrs, remoteAttrs, obj);
-  if (stillHasConflict) {
-    xhr.remoteObject = remoteAttrs;
-    return new $.Deferred().reject(xhr);
-  }
+  // if (stillHasConflict) {
+  //   xhr.remoteObject = remoteAttrs;
+  //   return new $.Deferred().reject(xhr);
+  // }
 
   return obj.save();
 }
