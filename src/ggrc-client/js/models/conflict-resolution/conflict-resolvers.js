@@ -79,7 +79,6 @@ export function customAttributeResolver(
       currentValueItem,
       remoteValueItem,
       containerValueItem,
-      'attribute_object.id',
       'attribute_object');
 
     conflict = conflict || hasValueConflict || hasObjectConflict;
