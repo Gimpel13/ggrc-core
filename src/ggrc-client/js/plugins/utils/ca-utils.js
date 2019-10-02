@@ -6,6 +6,8 @@
 import canCompute from 'can-compute';
 import canList from 'can-list';
 import canMap from 'can-map';
+import loMap from 'lodash/map';
+
 let customAttributesType = {
   Text: 'input',
   'Rich Text': 'text',
@@ -112,7 +114,7 @@ function convertFromCaValue(type, value, valueObj) {
 
   if (type === 'person') {
     if (valueObj) {
-      return valueObj.id;
+      return valueObj;
     }
     return null;
   }
@@ -144,7 +146,7 @@ function prepareCustomAttributes(definitions, values) {
       id: null,
       custom_attribute_id: id,
       attribute_value: def.default_value,
-      attribute_object: null,
+      attribute_objects: null,
       validation: {
         empty: true,
         mandatory: def.mandatory,
@@ -272,7 +274,7 @@ function convertToFormViewField(attr) {
     value: convertFromCaValue(
       attr.attributeType,
       attr.attribute_value,
-      attr.attribute_object
+      attr.attribute_objects
     ),
     title: attr.def.title,
     placeholder: attr.def.placeholder,
@@ -296,7 +298,7 @@ function convertToEditableField(attr) {
     value: convertFromCaValue(
       attr.attributeType,
       attr.attribute_value,
-      attr.attribute_object
+      attr.attribute_objects
     ),
     title: attr.def.title,
     placeholder: attr.def.placeholder,
@@ -353,12 +355,14 @@ function getCustomAttributes(instance, type) {
  */
 function setCustomAttributeValue(ca, value) {
   if (ca.attr('attributeType') === 'person') {
-    let attributeObject = value ? {id: value, type: 'Person'} : null;
-
+    const valueWithoutUselessProps =
+      loMap(value, ({id}) => ({id, type: 'Person'}));
+    const attributeObjects =
+      (value && value.length) ? valueWithoutUselessProps : null;
     ca.attr('attribute_value', 'Person');
-    ca.attr('attribute_object', attributeObject);
+    ca.attr('attribute_objects', attributeObjects);
   } else {
-    let convertedValue = convertToCaValue(ca.attr('attributeType'), value);
+    const convertedValue = convertToCaValue(ca.attr('attributeType'), value);
     ca.attr('attribute_value', convertedValue || ca.def.default_value);
   }
 }
