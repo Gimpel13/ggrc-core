@@ -39,13 +39,12 @@ export function tryResolveConflictValues(baseAttrs, attrs, remoteAttrs, obj) {
 
     hasConflict = hasConflict || unableToResolve;
   });
-
   return hasConflict;
 }
 
 export default function resolveConflict(xhr, obj, remoteAttrs) {
-  let attrs = loMerge({}, obj.attr());
-  let baseAttrs = loMerge({}, obj._backupStore()) || {};
+  const attrs = loMerge({}, obj.attr());
+  const baseAttrs = loMerge({}, obj._backupStore()) || {};
 
   if (loIsEqual(remoteAttrs, attrs)) {
     // current state is same as server state -- do nothing.
@@ -57,9 +56,8 @@ export default function resolveConflict(xhr, obj, remoteAttrs) {
 
   // merge current instance with remote attributes
   obj.attr(remoteAttrs);
-
   // check what properties changed -- we can merge if the same prop wasn't changed on both
-  let stillHasConflict =
+  const stillHasConflict =
     tryResolveConflictValues(baseAttrs, attrs, remoteAttrs, obj);
   if (stillHasConflict) {
     xhr.remoteObject = remoteAttrs;

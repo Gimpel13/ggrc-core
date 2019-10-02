@@ -6,18 +6,21 @@
 import loGet from 'lodash/get';
 import loKeyBy from 'lodash/keyBy';
 import loIsEqual from 'lodash/isEqual';
+import loFind from 'lodash/find';
+import loFilter from 'lodash/filter';
+
 export function buildChangeDescriptor(
   previousValue,
   currentValue,
   remoteValue) {
   // The object attribute was changed on the server
-  let isChangedOnServer = !loIsEqual(previousValue, remoteValue);
+  const isChangedOnServer = !loIsEqual(previousValue, remoteValue);
   // The object attribute was changed on the client
-  let isChangedLocally = !loIsEqual(previousValue, currentValue);
+  const isChangedLocally = !loIsEqual(previousValue, currentValue);
   // The change on the server was not the same as the change on the client
-  let isDifferent = !loIsEqual(currentValue, remoteValue);
+  const isDifferent = !loIsEqual(currentValue, remoteValue);
 
-  let hasConflict = (isChangedOnServer && isChangedLocally && isDifferent);
+  const hasConflict = (isChangedOnServer && isChangedLocally && isDifferent);
 
   return {
     hasConflict,
@@ -32,18 +35,18 @@ export function simpleFieldResolver(
   container,
   key,
   rootKey) {
-  let previousValue = loGet(baseAttrs, key);
-  let currentValue = loGet(attrs, key);
-  let remoteValue = loGet(remoteAttrs, key);
+  const previousValue = loGet(baseAttrs, key);
+  const currentValue = loGet(attrs, key);
+  const remoteValue = loGet(remoteAttrs, key);
 
-  let {hasConflict, isChangedLocally} = buildChangeDescriptor(
+  const {hasConflict, isChangedLocally} = buildChangeDescriptor(
     previousValue,
     currentValue,
     remoteValue);
 
-  if (isChangedLocally) {
-    let path = rootKey || key;
-    let currentRoot = loGet(attrs, path);
+  if (isChangedLocally && !hasConflict) {
+    const path = rootKey || key;
+    const currentRoot = loGet(attrs, path);
     container.attr(path, currentRoot);
   }
 
@@ -56,35 +59,68 @@ export function customAttributeResolver(
   currentValue = [],
   remoteValue = [],
   container = []) {
-  let currentValuesById = loKeyBy(currentValue, 'custom_attribute_id');
-  let remoteValuesById = loKeyBy(remoteValue, 'custom_attribute_id');
-  let containerValuesById = loKeyBy(container, 'custom_attribute_id');
+  const currentValuesById = loKeyBy(currentValue, 'custom_attribute_id');
+  const remoteValuesById = loKeyBy(remoteValue, 'custom_attribute_id');
+  const containerValuesById = loKeyBy(container, 'custom_attribute_id');
 
   let conflict = false;
   previousValue.forEach((previousValueItem) => {
-    let definitionId = previousValueItem.custom_attribute_id;
-    let currentValueItem = currentValuesById[definitionId];
-    let remoteValueItem = remoteValuesById[definitionId];
-    let containerValueItem = containerValuesById[definitionId];
+    const definitionId = previousValueItem.custom_attribute_id;
+    const currentValueItem = currentValuesById[definitionId];
+    const remoteValueItem = remoteValuesById[definitionId];
+    const containerValueItem = containerValuesById[definitionId];
 
-    let hasValueConflict = simpleFieldResolver(
+    const hasValueConflict = simpleFieldResolver(
       previousValueItem,
       currentValueItem,
       remoteValueItem,
       containerValueItem,
       'attribute_value');
 
-    let hasObjectConflict = simpleFieldResolver(
+    const hasObjectsConflict = simpleFieldResolver(
       previousValueItem,
       currentValueItem,
       remoteValueItem,
       containerValueItem,
-      'attribute_object.id',
-      'attribute_object');
+      'attribute_objects');
 
-    conflict = conflict || hasValueConflict || hasObjectConflict;
+    if (hasObjectsConflict) {
+      const resolvedAttributeObjects = resolveAttributeObjects(
+        previousValueItem.attribute_objects,
+        currentValueItem.attribute_objects,
+        remoteValueItem.attribute_objects);
+      containerValueItem.attr('attribute_objects', resolvedAttributeObjects);
+    }
+
+    conflict = conflict || hasValueConflict;
   });
 
   return conflict;
 }
 
+export function resolveAttributeObjects(
+  previousObjects,
+  currentObjects,
+  remoteObjects) {
+  const deletedObjects =
+    loFilter(previousObjects,
+      (previousObjectsEl) => !loFind(currentObjects,
+        (currentObjectsEl) => currentObjectsEl.id === previousObjectsEl.id));
+  const addedObjects =
+    loFilter(currentObjects,
+      (currentObjectsEl) => !loFind(previousObjects,
+        (previousObjectsEl) => currentObjectsEl.id === previousObjectsEl.id));
+  // array of objects from server without objects that was deleted on client
+  const remoteObjsWithoutDeleted =
+    loFilter(remoteObjects,
+      (remoteObjectsEl) => !loFind(deletedObjects,
+        (deletedObjectsEl) => deletedObjectsEl.id === remoteObjectsEl.id));
+  // array of objects that was added on client and do not have copies on the server
+  const shouldBeAddedRemotly =
+    loFilter(addedObjects,
+      (addedObjectsEl) => !loFind(remoteObjects,
+        (remoteObjectsEl) => addedObjectsEl.id === remoteObjectsEl.id));
+  const resolvedAttributeObjects = [...remoteObjsWithoutDeleted,
+    ...shouldBeAddedRemotly];
+  return resolvedAttributeObjects.length ? resolvedAttributeObjects : null;
+}

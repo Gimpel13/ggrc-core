@@ -9,6 +9,7 @@ import {
   buildChangeDescriptor,
   simpleFieldResolver,
   customAttributeResolver,
+  resolveAttributeObjects,
 } from '../conflict-resolvers';
 
 describe('conflict resolvers', () => {
@@ -16,11 +17,11 @@ describe('conflict resolvers', () => {
     describe('builds "hasConflict"', () => {
       it('positive if value was changed locally and on server differently',
         () => {
-          let previousValue = '1';
-          let currentValue = '2';
-          let remoteValue = '3';
+          const previousValue = '1';
+          const currentValue = '2';
+          const remoteValue = '3';
 
-          let {hasConflict} = buildChangeDescriptor(
+          const {hasConflict} = buildChangeDescriptor(
             previousValue,
             currentValue,
             remoteValue);
@@ -29,11 +30,11 @@ describe('conflict resolvers', () => {
         });
 
       it('negative if value was changed only on server', () => {
-        let previousValue = '1';
-        let currentValue = '1';
-        let remoteValue = '2';
+        const previousValue = '1';
+        const currentValue = '1';
+        const remoteValue = '2';
 
-        let {hasConflict} = buildChangeDescriptor(
+        const {hasConflict} = buildChangeDescriptor(
           previousValue,
           currentValue,
           remoteValue);
@@ -42,11 +43,11 @@ describe('conflict resolvers', () => {
       });
 
       it('negative if value was changed only locally', () => {
-        let previousValue = '1';
-        let currentValue = '2';
-        let remoteValue = '1';
+        const previousValue = '1';
+        const currentValue = '2';
+        const remoteValue = '1';
 
-        let {hasConflict} = buildChangeDescriptor(
+        const {hasConflict} = buildChangeDescriptor(
           previousValue,
           currentValue,
           remoteValue);
@@ -56,11 +57,11 @@ describe('conflict resolvers', () => {
 
       it('negative if value was changed locally and on server equally',
         () => {
-          let previousValue = '1';
-          let currentValue = '2';
-          let remoteValue = '2';
+          const previousValue = '1';
+          const currentValue = '2';
+          const remoteValue = '2';
 
-          let {hasConflict} = buildChangeDescriptor(
+          const {hasConflict} = buildChangeDescriptor(
             previousValue,
             currentValue,
             remoteValue);
@@ -71,10 +72,10 @@ describe('conflict resolvers', () => {
 
     describe('builds "isChangedLocally"', () => {
       it('positive if value was changed locally', () => {
-        let previousValue = '1';
-        let currentValue = '2';
+        const previousValue = '1';
+        const currentValue = '2';
 
-        let {isChangedLocally} = buildChangeDescriptor(
+        const {isChangedLocally} = buildChangeDescriptor(
           previousValue,
           currentValue);
 
@@ -82,10 +83,10 @@ describe('conflict resolvers', () => {
       });
 
       it('negative if value was not changed locally', () => {
-        let previousValue = '1';
-        let currentValue = '1';
+        const previousValue = '1';
+        const currentValue = '1';
 
-        let {isChangedLocally} = buildChangeDescriptor(
+        const {isChangedLocally} = buildChangeDescriptor(
           previousValue,
           currentValue);
 
@@ -108,12 +109,12 @@ describe('conflict resolvers', () => {
     });
 
     it('resolves server change', () => {
-      let key = 'field';
+      const key = 'field';
       baseAttrs[key] = '1';
       attrs[key] = '1';
       remoteAttrs[key] = '2';
 
-      let hasConflict = simpleFieldResolver(
+      const hasConflict = simpleFieldResolver(
         baseAttrs,
         attrs,
         remoteAttrs,
@@ -124,12 +125,12 @@ describe('conflict resolvers', () => {
     });
 
     it('resolves local change', () => {
-      let key = 'field';
+      const key = 'field';
       baseAttrs[key] = '1';
       attrs[key] = '2';
       remoteAttrs[key] = '1';
 
-      let hasConflict = simpleFieldResolver(
+      const hasConflict = simpleFieldResolver(
         baseAttrs,
         attrs,
         remoteAttrs,
@@ -140,12 +141,12 @@ describe('conflict resolvers', () => {
     });
 
     it('resolves the same server and local change', () => {
-      let key = 'field';
+      const key = 'field';
       baseAttrs[key] = '1';
       attrs[key] = '2';
       remoteAttrs[key] = '2';
 
-      let hasConflict = simpleFieldResolver(
+      const hasConflict = simpleFieldResolver(
         baseAttrs,
         attrs,
         remoteAttrs,
@@ -157,12 +158,12 @@ describe('conflict resolvers', () => {
     });
 
     it('does not resolve different server and local change', () => {
-      let key = 'field';
+      const key = 'field';
       baseAttrs[key] = '1';
       attrs[key] = '2';
       remoteAttrs[key] = '3';
 
-      let hasConflict = simpleFieldResolver(
+      const hasConflict = simpleFieldResolver(
         baseAttrs,
         attrs,
         remoteAttrs,
@@ -210,7 +211,7 @@ describe('conflict resolvers', () => {
         }];
         container = new canList(remoteValue);
 
-        let hasConflict = customAttributeResolver(
+        const hasConflict = customAttributeResolver(
           previousValue,
           currentValue,
           remoteValue,
@@ -236,7 +237,7 @@ describe('conflict resolvers', () => {
         }];
         container = new canList(remoteValue);
 
-        let hasConflict = customAttributeResolver(
+        const hasConflict = customAttributeResolver(
           previousValue,
           currentValue,
           remoteValue,
@@ -261,7 +262,7 @@ describe('conflict resolvers', () => {
         }];
         container = new canList(remoteValue);
 
-        let hasConflict = customAttributeResolver(
+        const hasConflict = customAttributeResolver(
           previousValue,
           currentValue,
           remoteValue,
@@ -286,7 +287,7 @@ describe('conflict resolvers', () => {
         }];
         container = new canList(remoteValue);
 
-        let hasConflict = customAttributeResolver(
+        const hasConflict = customAttributeResolver(
           previousValue,
           currentValue,
           remoteValue,
@@ -311,7 +312,7 @@ describe('conflict resolvers', () => {
         }];
         container = new canList(remoteValue);
 
-        let hasConflict = customAttributeResolver(
+        const hasConflict = customAttributeResolver(
           previousValue,
           currentValue,
           remoteValue,
@@ -321,140 +322,181 @@ describe('conflict resolvers', () => {
       });
     });
 
-    describe('checks attribute object and', () => {
+    describe('checks attribute objects and', () => {
       it('resolves change of different fields', () => {
         previousValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 1},
+          attribute_objects: [{id: 1}, {id: 3}],
         }, {
           custom_attribute_id: 2,
-          attribute_object: {id: 1},
+          attribute_objects: [{id: 1}, {id: 3}],
         }];
         currentValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 2},
+          attribute_objects: [{id: 2}, {id: 3}],
         }, {
           custom_attribute_id: 2,
-          attribute_object: {id: 1},
+          attribute_objects: [{id: 1}, {id: 3}],
         }];
         remoteValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 1},
+          attribute_objects: [{id: 1}, {id: 3}],
         }, {
           custom_attribute_id: 2,
-          attribute_object: {id: 2},
+          attribute_objects: [{id: 2}, {id: 3}],
         }];
         container = new canList(remoteValue);
 
-        let hasConflict = customAttributeResolver(
+        const hasConflict = customAttributeResolver(
           previousValue,
           currentValue,
           remoteValue,
           container);
 
         expect(hasConflict).toBe(false);
-        expect(container.attr('0.attribute_object').attr()).toEqual({id: 2});
-        expect(container.attr('1.attribute_object').attr()).toEqual({id: 2});
+        expect(container.attr('0.attribute_objects').attr())
+          .toEqual([{id: 2}, {id: 3}]);
+        expect(container.attr('1.attribute_objects').attr())
+          .toEqual([{id: 2}, {id: 3}]);
       });
 
       it('resolves server change', () => {
         previousValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 1},
+          attribute_objects: [{id: 1}, {id: 3}],
         }];
         currentValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 1},
+          attribute_objects: [{id: 1}, {id: 3}],
         }];
         remoteValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 2},
+          attribute_objects: [{id: 2}, {id: 3}],
         }];
         container = new canList(remoteValue);
 
-        let hasConflict = customAttributeResolver(
+        const hasConflict = customAttributeResolver(
           previousValue,
           currentValue,
           remoteValue,
           container);
 
         expect(hasConflict).toBe(false);
-        expect(container.attr('0.attribute_object').attr()).toEqual({id: 2});
+        expect(container.attr('0.attribute_objects').attr())
+          .toEqual([{id: 2}, {id: 3}]);
       });
 
       it('resolves local change', () => {
         previousValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 1},
+          attribute_objects: [{id: 1}, {id: 3}],
         }];
         currentValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 2},
+          attribute_objects: [{id: 2}, {id: 3}],
         }];
         remoteValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 1},
+          attribute_objects: [{id: 1}, {id: 3}],
         }];
         container = new canList(remoteValue);
 
-        let hasConflict = customAttributeResolver(
+        const hasConflict = customAttributeResolver(
           previousValue,
           currentValue,
           remoteValue,
           container);
 
         expect(hasConflict).toBe(false);
-        expect(container.attr('0.attribute_object').attr()).toEqual({id: 2});
+        expect(container.attr('0.attribute_objects').attr())
+          .toEqual([{id: 2}, {id: 3}]);
       });
 
       it('resolves the same local and server change', () => {
         previousValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 1},
+          attribute_objects: [{id: 1}, {id: 3}],
         }];
         currentValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 2},
+          attribute_objects: [{id: 2}, {id: 3}],
         }];
         remoteValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 2},
+          attribute_objects: [{id: 2}, {id: 3}],
         }];
         container = new canList(remoteValue);
 
-        let hasConflict = customAttributeResolver(
+        const hasConflict = customAttributeResolver(
           previousValue,
           currentValue,
           remoteValue,
           container);
 
         expect(hasConflict).toBe(false);
-        expect(container.attr('0.attribute_object').attr()).toEqual({id: 2});
+        expect(container.attr('0.attribute_objects').attr())
+          .toEqual([{id: 2}, {id: 3}]);
       });
 
-      it('does not resolve different local and server change', () => {
+      it('resolve different local and server change', () => {
         previousValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 1},
+          attribute_objects: [{id: 1}, {id: 4}],
         }];
         currentValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 2},
+          attribute_objects: [{id: 2}, {id: 4}],
         }];
         remoteValue = [{
           custom_attribute_id: 1,
-          attribute_object: {id: 3},
+          attribute_objects: [{id: 3}, {id: 4}],
         }];
-        container = new canList(remoteValue);
+        container = new canList(currentValue);
 
-        let hasConflict = customAttributeResolver(
+        customAttributeResolver(
           previousValue,
           currentValue,
           remoteValue,
           container);
 
-        expect(hasConflict).toBe(true);
+        const expectedResult = [{
+          custom_attribute_id: 1,
+          attribute_objects: [{id: 3}, {id: 4}, {id: 2}],
+        }];
+        expect(container.attr()).toEqual(expectedResult);
       });
+    });
+  });
+  describe('resolveAttributeObjects', () => {
+    it('should add new objects when they was added on server', () => {
+      const previousObjects = [{id: 1}];
+      const currentObjects = [{id: 2}];
+      const remoteObjects = [{id: 2}, {id: 3}];
+      const expectedResult = [{id: 2}, {id: 3}];
+      const resolvedAttributeObjects =
+        resolveAttributeObjects(previousObjects, currentObjects, remoteObjects);
+      expect(resolvedAttributeObjects).toEqual(expectedResult);
+    });
+
+    it('should delete objects when they was deleted on server', () => {
+      const previousObjects = [{id: 1}, {id: 2}];
+      const currentObjects = [{id: 1}];
+      const remoteObjects = [];
+      const expectedResult = null;
+      const resolvedAttributeObjects =
+        resolveAttributeObjects(previousObjects, currentObjects, remoteObjects);
+      expect(resolvedAttributeObjects).toBe(expectedResult);
+    });
+
+    it('should add objects at the local when they was added on server and put'
+      + 'to the server objects that was added local', () => {
+      const previousObjects = [];
+      const currentObjects = [{id: 1}];
+      const remoteObjects = [{id: 2}];
+      const expectedResult = [{id: 2}, {id: 1}];
+      const resolvedAttributeObjects =
+        resolveAttributeObjects(previousObjects, currentObjects, remoteObjects);
+      expect(resolvedAttributeObjects).toEqual(expectedResult);
     });
   });
 });
