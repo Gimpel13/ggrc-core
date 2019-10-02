@@ -17,8 +17,8 @@ describe('person-form-field component', function () {
     viewModel.attr('fieldId', 1);
   });
 
-  it('add a person and fiers valueChanged event' +
-   'if new person has other id', function () {
+  it('adds a person and dispatch valueChanged event' +
+   'if new person is not in the list', function () {
     viewModel.attr('value', [{id: 1}]);
     viewModel.dispatch.calls.reset();
     viewModel.addPerson({selectedItem: {id: 2}});
@@ -27,21 +27,21 @@ describe('person-form-field component', function () {
     expect(dispatchedObject.value[1].id).toEqual(2);
   });
 
-  it('does not fire valueChanged event' +
+  it('does not dispatch valueChanged event' +
     ' on first value assignation', function () {
     viewModel.attr('value', undefined);
     expect(viewModel.dispatch).not.toHaveBeenCalled();
   });
 
   it('does not fire valueChanged event' +
-    'if new person has similar id as defined people', function () {
+    'if new person is already in the list', function () {
     viewModel.attr('value', [{id: 1}, {id: 2}]);
     viewModel.dispatch.calls.reset();
     viewModel.addPerson({selectedItem: new canMap({id: 2})});
     expect(viewModel.dispatch).not.toHaveBeenCalled();
   });
 
-  it('remove a person and fires valueChanged event', function () {
+  it('removes a person and dispatch valueChanged event', function () {
     const attributeObject1 = new canMap({id: 1});
     const attributeObject2 = new canMap({id: 2});
     viewModel.attr('value', [attributeObject1, attributeObject2]);
