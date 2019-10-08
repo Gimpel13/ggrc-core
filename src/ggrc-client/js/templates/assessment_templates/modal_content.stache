@@ -165,9 +165,11 @@
       {{#if instance.sox_302_enabled}}
         <div class="row-fluid hidable">
           <div class="alert alert-nomargin sox-302-enabled__note">
-            By checking this checkbox:
             <p>
-              - Verification step will be skipped if only positive answers are given for the assessment. Specify negative answers below.
+              By checking this checkbox:
+              <p>
+                - Verification step will be skipped if only positive answers are given for the assessment. Specify negative answers below.
+              </p>
             </p>
           </div>
         </div>
