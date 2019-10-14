@@ -48,21 +48,14 @@ class WithSOX302Flow(object):  # pylint: disable=too-few-public-methods
 
   @classmethod
   def indexed_query(cls):
-<<<<<<< HEAD
-    """Return DB query used for object indexing.
-
-    Here `sox_302_enabled` is added to sqlalchemy query constructed during
-    `super` call to allow indexing and thus search of objects by this field.
-    """
-=======
     """Return DB query used for object indexing."""
->>>>>>> Add SOX302 flag for asmt tmpl
     query = super(WithSOX302Flow, cls).indexed_query()
     return query.options(
         sa_orm.Load(cls).load_only(
             "sox_302_enabled",
         ),
     )
+<<<<<<< HEAD
 <<<<<<< HEAD
 
   def _has_negative_cavs(self):
@@ -129,6 +122,8 @@ class WithSOX302Flow(object):  # pylint: disable=too-few-public-methods
       initial_state (collections.namedtuple): Initial state of the object.
     """
     self.exec_sox_302_status_flow(initial_state)
+=======
+>>>>>>> Create read-only SOX 302 mixin
 
 
 class WithSOX302FlowReadOnly(WithSOX302Flow):
@@ -146,5 +141,8 @@ class WithSOX302FlowReadOnly(WithSOX302Flow):
   _api_attrs = reflection.ApiAttributes(
       reflection.Attribute('sox_302_enabled', create=False, update=False),
   )
+<<<<<<< HEAD
 =======
 >>>>>>> Add SOX302 flag for asmt tmpl
+=======
+>>>>>>> Create read-only SOX 302 mixin
