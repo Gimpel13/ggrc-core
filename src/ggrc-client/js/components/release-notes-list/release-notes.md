@@ -2,6 +2,7 @@
 
 Our product team is working hard to engineer compliance @ scale and make your day to day user journeys easier. We have been adding key capabilities to the product as listed here below.
 
+<<<<<<< HEAD
 ## Additional description for an evidence (v2.21.0, 11/13/2019)
 
 ## Ability to create a new Cycle Task Group during active Cycle (v2.20.0, 10/29/2019)
@@ -121,6 +122,121 @@ Our product team is working hard to engineer compliance @ scale and make your da
 ### Additional description for an evidence (v2.21.0, 11/13/2019)
 
 From now, you can add an optional additional description to an evidence file or evidence URL.
+=======
+## Ability to create a new Cycle Task Group during active Cycle (v2.20.0, 10/29/2019)
+
+## Administration of Global Custom Attributes for Controls and Risks is moved to the new frontend (v2.17.0, 10/1/2019)
+
+## Create a single Assessment with custom attributes from an Assessment Template (v2.10.0, 07/31/2019)
+
+## Ability to save searches (v2.9.0, 07/23/2019)
+
+## New rules for Ticket Tracker integration for Assessments (v2.8.0, 07/16/2019)
+
+## Custom Attributes of the Person type are no longer available  (v2.8.0, 07/16/2019)
+
+## Introducing ‘Propose changes’ on Programs (v2.7.0, 07/01/2019)
+
+## Possibility to revert to any version of a Program (v2.7.0, 07/01/2019)
+
+## Past Evidence can be marked as ‘Deprecated’ (v2.7.0, 07/01/2019)
+
+## Introducing the ‘Multiselect’ attribute on Assessment templates (v2.7.0, 07/01/2019)
+
+## Introducing new Risk Library frontend (v.2.6.0, 06/18/2019)
+
+## Integration with Drogon enabled for SOX systems (v.2.5.0, 05/22/2019)
+
+## Mapping Scope Object to Standard or Regulation moved to new frontend (v.2.5.0, 05/22/2019)
+
+## Introducing Program to Program mapping (Mega Program) (v.2.3.0, 05/03/2019)
+
+## A functionality to turn off sync of people fields between Assessment and Ticket tracker (v.2.3.0, 05/03/2019)
+
+## Mentioning person enabled at comments (v.2.2.0, 04/24/2019)
+
+## New object Account Balance (v.2.1.0, 04/10/2019)
+
+## Introducing new Control Library frontend (v.2.0.0, 03/26/2019)
+
+## ‘Related Requirements’ added to snapshot (v.2.0.0, 03/26/2019)
+
+## Introduced new object ‘Key report’ (v.1.41.0, 02/19/2019)
+
+## Changes at synchronization logic with Ticket Tracker (v.1.39.0, 02/05/2019)
+
+## Calendar events added for tasks (v.1.38.0, 01/16/2019)
+
+## Added a checkbox in Audit ‘Create screen’ to map snapshots manually (v.1.38.0, 01/16/2019)
+
+## Primary and Secondary Contacts in Control object are renamed (v.1.35.0, 12/20/2018)
+
+## You can now import ticket tracker integration settings for assessments and issues (v1.32.0, 11/28/2018)
+
+## New roles for scoping objects (v1.29.0, 10/30/2018)
+
+## Link existing tickets to track assessments and issues (v1.28.0, 10/24/2018)
+
+## Changes to the mapping flow from scope to directives (v1.25.0, 10/04/2018)
+
+## Enhanced object review flow (v1.24.0, 09/26/2018)
+
+## Linking assessments with other issue tracking systems in bulk (v1.23.0, 09/18/2018)
+
+## Roles reorganization for scoping objects (v1.22.0, 09/18/2018)
+
+## New roles for scoping objects (v1.19.0, 08/23/2018)
+
+## Due Date for Issue object (v1.18.0, 08/14/2018)
+
+## Requirement object type (v1.17.0, 08/07/2018)
+
+## Linking issue object with other issue tracking systems (v1.16.0, 07/31/2018)
+
+## New scoping objects (v1.15.0, 07/12/2018)
+
+## Document object (v1.13.0, 06/19/2018)
+
+## Disable some automatic mapping rules (v1.12.0, 06/13/2018)
+
+## Evidences for Assessments and Audits (v1.11.0, 05/30/2018)
+
+## Offline mode for Import and export (v1.9.0, 04/25/2018)
+
+## Re-use assessment templates across different Audits (v1.6.0, 03/15/2018)
+
+## No more automatic mappings from Objective-Objective and Control-Control relationships (v1.6.0, 03/15/2018)
+
+## Auto-copying of assessment procedure (v1.4.0, 02/22/2018)
+
+## Task secondary assignees (v1.3.0, 02/12/2018)
+
+## Improvements to RBAC model (v1.3.0, 02/12/2018)
+
+## Piper / Git style lite weight versioning on objects like Controls & Risks (v1.2.0, 01/24/2018)
+
+## Versioning functionality for Controls & Risks with ability to roll back to any previous version (v1.2.0, 01/24/2018)
+
+## Reverting assessments to ‘In Progress’ state (v1.0.0, 01/04/2018)
+
+## Labeling assessments (v1.0.0, 01/04/2018)
+
+## Improvements to surfacing ‘related assessments’ (v0.10.37, 12/20/2017)
+
+## Extend assessment assignees rights (v0.10.37, 12/20/2017)
+
+## Commenting functionality (v0.10.37, 12/20/2017)
+
+## Default sorting by ‘Last Updated Date’ (v0.10.37, 12/20/2017)
+
+## Change Workflow tasks state in bulk (v0.10.36, 12/12/2017)
+
+## Import from Google Sheets (v0.10.36, 12/12/2017)
+
+## Linking assessments with other issue tracking systems (v0.10.36, 12/12/2017)
+
+## Performance improvements
+>>>>>>> Replace links by headers
 
 ### Ability to create a new Cycle Task Group during active Cycle (v2.20.0, 10/29/2019)
 
