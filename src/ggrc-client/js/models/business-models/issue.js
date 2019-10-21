@@ -66,15 +66,13 @@ export default Cacheable.extend({
   statuses: ['Draft', 'Deprecated', 'Active', 'Fixed', 'Fixed and Verified'],
   unchangeableIssueTrackerIdStatuses:
     ['Fixed', 'Fixed and Verified', 'Deprecated'],
-  buildIssueTrackerConfig(instance) {
+  buildIssueTrackerConfig() {
     return {
       hotlist_id: '1498476',
       component_id: '398781',
       issue_severity: 'S2',
       issue_priority: 'P2',
       issue_type: 'PROCESS',
-      title: instance.title || '',
-      enabled: instance.isNew(),
     };
   },
 }, {

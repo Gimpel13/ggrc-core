@@ -110,7 +110,6 @@ export default Cacheable.extend({
       issue_severity: 'S2',
       issue_priority: 'P2',
       issue_type: 'PROCESS',
-      enabled: false,
       people_sync_enabled: true,
     };
   },
