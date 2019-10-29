@@ -298,6 +298,19 @@ Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
                   </ul>
                 {% endif %}
 
+                {% if digest.get('') %}
+                  <h2 {{ style.sub_title() }} >Overdue assessments</h2>
+                  <ul {{ style.list_wrap() }} >
+                  {% for assessment_id, assessment_data in digest['assessment_ready_for_review'].iteritems() %}
+                    <li {{ style.list_item() }} >
+                      <a href="{{ assessment_data['url'] }}" {{ style.link_text() }} >
+                        {{ assessment_data['title']|e }}</a>
+                        ({{ assessment_data['notif_created_at'].values()[0] }})
+                    </li>
+                  {% endfor %}
+                  </ul>
+                {% endif %}
+
                 {% if digest.get('assessment_verified') %}
                   <h2 {{ style.sub_title() }} >Verified assessments</h2>
                   <ul {{ style.list_wrap() }} >
