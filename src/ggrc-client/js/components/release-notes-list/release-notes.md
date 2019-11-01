@@ -3,6 +3,7 @@
 Our product team is working hard to engineer compliance @ scale and make your day to day user journeys easier. We have been adding key capabilities to the product as listed here below.
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## Additional description for an evidence (v2.21.0, 11/13/2019)
 
 ## Ability to create a new Cycle Task Group during active Cycle (v2.20.0, 10/29/2019)
@@ -123,6 +124,10 @@ Our product team is working hard to engineer compliance @ scale and make your da
 
 From now, you can add an optional additional description to an evidence file or evidence URL.
 =======
+=======
+## Additional description for an evidence (v2.21.0, 11/13/2019)
+
+>>>>>>> Update whats new for 2.21.0
 ## Ability to create a new Cycle Task Group during active Cycle (v2.20.0, 10/29/2019)
 
 ## Administration of Global Custom Attributes for Controls and Risks is moved to the new frontend (v2.17.0, 10/1/2019)
@@ -237,6 +242,10 @@ From now, you can add an optional additional description to an evidence file or 
 
 ## Performance improvements
 >>>>>>> Replace links by headers
+
+### Additional description for an evidence (v2.21.0, 11/13/2019)
+
+From now, you can add an optional additional description to an evidence file or evidence URL.
 
 ### Ability to create a new Cycle Task Group during active Cycle (v2.20.0, 10/29/2019)
 
