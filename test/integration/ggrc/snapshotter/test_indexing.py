@@ -3,15 +3,17 @@
 
 """Test for indexing of snapshotted objects"""
 
-import ddt
+from sqlalchemy import exc as sa_exc
 from sqlalchemy.sql.expression import tuple_
+import ddt
 
 from ggrc import db
 from ggrc import models
 from ggrc.models import all_models
 from ggrc.fulltext.mysql import MysqlRecordProperty as Record
-from ggrc.snapshotter.indexer import delete_records
-from ggrc.snapshotter.rules import Types
+from ggrc.snapshotter import datastructures as snapshotter_datastructures
+from ggrc.snapshotter import indexer as snapshotter_indexer
+from ggrc.snapshotter import rules as snapshotter_rules
 
 from integration.ggrc.snapshotter import SnapshotterBaseTestCase
 from integration.ggrc.models import factories
@@ -94,11 +96,31 @@ class TestSnapshotIndexing(SnapshotterBaseTestCase):
     })
     model_object_id = model_object.id
 
-    self.create_mapping(program, model_object)
-    model_object = self.refresh_object(model_object)
-    self.api.modify_object(model_object, {
-        "title": "Test Snapshot 1 - {} EDIT".format(model_name)
-    })
+    records = db.session.query(Record).filter(
+        tuple_(
+            Record.type,
+            Record.key,
+            Record.property,
+            Record.content
+        ).in_(
+            {("Snapshot", s.id, "parent", "Audit-{}".format(audit.id))
+             for s in snapshots}
+        ))
+
+    expected_count = len(snapshotter_rules.Types.internal_types()) * 3
+    self.assertEqual(records.count(), expected_count)
+
+    # At this point all objects are no longer in the session and we have to
+    # manually refresh them from the database
+    access_group = db.session.query(models.AccessGroup).filter(
+        models.AccessGroup.slug == "ag-2"
+    ).one()
+    objective = db.session.query(models.Objective).filter(
+        models.Objective.slug == "obj-1"
+    ).one()
+    process = db.session.query(models.Process).filter(
+        models.Process.slug == "proc-2"
+    ).one()
 
     program = self.refresh_object(program)
     audit = self.create_audit(program)
@@ -185,7 +207,63 @@ class TestSnapshotIndexing(SnapshotterBaseTestCase):
     snapshots = db.session.query(models.Snapshot).all()
     records = get_records(audit, snapshots)
 
-    self.assertEqual(records.count(), 1)
+    records = db.session.query(Record).filter(
+        tuple_(
+            Record.type,
+            Record.key,
+            Record.property,
+            Record.content
+        ).in_(
+            {("Snapshot", s.id, "parent", "Audit-{}".format(s.parent_id))
+             for s in snapshots}
+        ))
+
+    expected_count = len(snapshotter_rules.Types.internal_types()) * 3
+    self.assertEqual(records.count(), expected_count)
+
+    custom_attributes = [
+        (objective,
+         "objective title edited after initial index",
+         "objective rich field 1",
+         "objective CA value edited after initial index"),
+        (access_group,
+         "access group title edited after initial index",
+         "access group text field 2",
+         "access_group CA value edited after initial index")
+    ]
+
+    for obj, title, definition, value in custom_attributes:
+      obj = self.refresh_object(obj)
+      snapshot = db.session.query(models.Snapshot).filter(
+          models.Snapshot.child_type == obj.type,
+          models.Snapshot.child_id == obj.id,
+      ).one()
+
+      _cav = db.session.query(Record).filter(
+          Record.key == snapshot.id,
+          Record.type == "Snapshot",
+          Record.property == definition,
+          Record.content == value
+      )
+      _title = db.session.query(Record).filter(
+          Record.key == snapshot.id,
+          Record.type == "Snapshot",
+          Record.property == "title",
+          Record.content == title
+      )
+      _desc = db.session.query(Record).filter(
+          Record.key == snapshot.id,
+          Record.type == "Snapshot",
+          Record.property == "description",
+          Record.content == obj.description
+      )
+      self.assertEqual(_cav.count(), 1)
+      self.assertEqual(_title.count(), 1)
+      self.assertEqual(_desc.count(), 1)
+
+  def test_full_reindex(self):
+    """Test full reindex of all snapshots"""
+    self._check_csv_response(self._import_file("snapshotter_create.csv"), {})
 
     snapshot = db.session.query(models.Snapshot).filter(
         models.Snapshot.child_type == model_object.type,
@@ -215,10 +293,12 @@ class TestSnapshotIndexing(SnapshotterBaseTestCase):
 
     snapshots = db.session.query(models.Snapshot).all()
     records = get_records(audit, snapshots)
+    expected_count = len(snapshotter_rules.Types.internal_types()) * 3
 
     self.assertEqual(records.count(), 1)
 
-    delete_records({s.id for s in snapshots})
+    snapshotter_indexer.delete_records({s.id for s in snapshots})
+
     records = get_records(audit, snapshots)
     self.assertEqual(records.count(), 0)
 
@@ -545,3 +625,71 @@ class TestSnapshotIndexing(SnapshotterBaseTestCase):
     self.assert_indexed_fields(snapshot, "kind", {
         "": option_title
     })
+
+  @staticmethod
+  def _create_int_and_ext_cads(custom_attributable):
+    """Create internal and external CAD differing in title case.
+
+    Args:
+      custom_attributable (db.Model): Instance of custom attributable model
+        for which internal and external CADs should be created.
+    """
+    factories.CustomAttributeDefinitionFactory(
+        definition_type=custom_attributable._inflector.table_singular,
+        title="custom attribute",
+    )
+    factories.ExternalCustomAttributeDefinitionFactory(
+        definition_type=custom_attributable._inflector.table_singular,
+        title="custom attribute".title(),
+    )
+
+  @staticmethod
+  def _create_snapshot_from_last_rev(parent, child):
+    """Create snapshot from last revision of child and map it to parent.
+
+    Get last revision of passed `child` object and create a Snapshot from it
+    mapped to passed `parent` object.
+
+    Args:
+      parent (db.Model): Instacne to be used as a parent for Snapshot.
+      child (db.Model): Instance to be used as a child for Snapshot.
+    """
+    last_rev = all_models.Revision.query.filter(
+        all_models.Revision.resource_type == child.type,
+        all_models.Revision.resource_id == child.id,
+    ).one()
+
+    with factories.single_commit():
+      factories.SnapshotFactory(
+          parent=parent,
+          child_type=child.type,
+          child_id=child.id,
+          revision=last_rev,
+      )
+
+  @ddt.data(
+      factories.ControlFactory,
+      factories.RiskFactory,
+  )
+  def test_reindex_pairs(self, external_model_factory):
+    """Test reindex_pairs for same CADs in internal and external.
+
+    Test that `reindex_pairs` functionality works correctly for snapshots when
+    they have same CADs both in internal and external CAD tables but this CADs
+    have titles in lower and upper case.
+    """
+    with factories.single_commit():
+      audit = factories.AuditFactory()
+      external_object = external_model_factory()
+      self._create_int_and_ext_cads(external_object)
+    self._create_snapshot_from_last_rev(
+        parent=audit,
+        child=external_object,
+    )
+
+    try:
+      snapshotter_indexer.reindex_pairs([
+          snapshotter_datastructures.Pair(audit, external_object),
+      ])
+    except sa_exc.IntegrityError:
+      self.fail("`reindex_pairs` failed due to IntegrityError")
