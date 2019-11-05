@@ -121,7 +121,7 @@ class TestBulkOperationsGroup(TestCase):
             "id": asmt.id,
             "title": asmt.title,
             "attribute_value": cav.attribute_value,
-            "attribute_person_id": None,
+            "attribute_person_id": 0,
         }]
     }]
     response = self.client.post(
@@ -222,7 +222,7 @@ class TestBulkOperationsGroup(TestCase):
             "id": asmt.id,
             "title": asmt.title,
             "attribute_value": "1,2",
-            "attribute_person_id": None,
+            "attribute_person_id": 0,
         }]
     }]
     response = self.client.post(
@@ -287,7 +287,7 @@ class TestBulkOperationsGroup(TestCase):
             "id": asmt1.id,
             "title": asmt1.title,
             "attribute_value": "test_value",
-            "attribute_person_id": None,
+            "attribute_person_id": 0,
         }]
     }]
     response = self.client.post(
