@@ -239,10 +239,10 @@ class TestRelatedAssessments(TestCase):
     self.assertEqual(len(cavs_json), 1)
 
     cav_json = cavs_json[0]
-
-    attribute_object_json = cav_json["attribute_object"]
-
-    self.assertEqual(attribute_object_json, {
+    attribute_object_json = cav_json["attribute_objects"]
+    expected_attribute_objects = [{
         u"type": u"Person",
         u"id": person_id
-    })
+    }]
+
+    self.assertEqual(attribute_object_json, expected_attribute_objects)
