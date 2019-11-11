@@ -9,7 +9,7 @@ import * as issueTrackerUtils from '../../plugins/utils/issue-tracker-utils';
 
 export default class IssueTracker extends Mixin {
   'after:init'() {
-    this.initIssueTracker();
+    this.initIssueTracker(this.getConfig());
   }
 
   'before:refresh'() {
@@ -20,15 +20,11 @@ export default class IssueTracker extends Mixin {
     issueTrackerUtils.cleanUpBeforeSave(this);
   }
 
-  afterRefresh() {
-    this.initIssueTracker();
-  }
-
   afterSave() {
     issueTrackerUtils.checkWarnings(this);
   }
 
-  initIssueTracker() {
+  initIssueTracker({issueTrackerConfig, canUseIssueTracker}) {
     if (!GGRC.ISSUE_TRACKER_ENABLED) {
       return;
     }
@@ -37,26 +33,24 @@ export default class IssueTracker extends Mixin {
       this.attr('issue_tracker', new canMap({}));
     }
 
-    let config = this.constructor.buildIssueTrackerConfig
-      ? this.constructor.buildIssueTrackerConfig(this)
-      : {enabled: false};
-
     issueTrackerUtils.initIssueTrackerObject(
       this,
-      config,
-      true
+      issueTrackerConfig,
+      canUseIssueTracker,
     );
   }
 
-  setDefaultHotlistAndComponent() { // eslint-disable-line id-length
-    let config = this.constructor.buildIssueTrackerConfig ?
+  getConfig() {
+    const issueTrackerConfig = this.constructor.buildIssueTrackerConfig ?
       this.constructor.buildIssueTrackerConfig(this) :
-      {};
+      {enabled: false};
+    return {issueTrackerConfig, canUseIssueTracker: true};
+  }
 
-    this.attr('issue_tracker').attr({
-      hotlist_id: config.hotlist_id,
-      component_id: config.component_id,
-    });
+  setDefaultHotlistAndComponent() { // eslint-disable-line id-length
+    // eslint-disable-next-line camelcase
+    const {issueTrackerConfig: {hotlist_id, component_id}} = this.getConfig();
+    this.attr('issue_tracker').attr({hotlist_id, component_id});
   }
 
   issueCreated() {

@@ -10,87 +10,125 @@ import IssueTracker from '../issue-tracker';
 
 describe('IssueTracker mixin', () => {
   let Mixin;
+  const START_ENABLED_VALUE = GGRC.ISSUE_TRACKER_ENABLED;
 
-  beforeAll(function () {
+  beforeAll(() => {
     GGRC.ISSUE_TRACKER_ENABLED = true;
     Mixin = IssueTracker;
   });
 
-  describe('initIssueTracker() method', () => {
+  afterAll(() => {
+    GGRC.ISSUE_TRACKER_ENABLED = START_ENABLED_VALUE;
+  });
+
+  describe('"getConfig" method', () => {
     let method;
+    let stub;
+    let issueTrackerConfig;
 
-    beforeAll(() => {
-      method = Mixin.prototype.initIssueTracker;
-      GGRC.ISSUE_TRACKER_ENABLED = false;
-    });
-
-    it('should show issue tracker if globally enabled and' +
-       ' turn off by default', () => {
-      GGRC.ISSUE_TRACKER_ENABLED = true;
-      const stub = makeFakeInstance({model: Cacheable})();
-
-      spyOn(issueTrackerUtils, 'initIssueTrackerObject');
-      method.apply(stub);
-
-      expect(issueTrackerUtils.initIssueTrackerObject.calls.count()).toEqual(1);
-      const callArgs = issueTrackerUtils.initIssueTrackerObject
-        .calls.mostRecent().args;
-
-      expect(callArgs[1].enabled).toEqual(false); // turn off by default
-      expect(callArgs[2]).toEqual(true); // show issue tracker controls
-    });
-
-    it('should show issue tracker if globally enabled and' +
-       ' set up default values', () => {
-      GGRC.ISSUE_TRACKER_ENABLED = true;
-      const config = {
+    beforeEach(() => {
+      issueTrackerConfig = {
         hotlist_id: '766459',
         enabled: true,
       };
-
-      const stub = makeFakeInstance({
+      stub = makeFakeInstance({
         model: Cacheable,
         staticProps: {
           buildIssueTrackerConfig() {
-            return config;
+            return issueTrackerConfig;
           },
         },
       })();
-
-      spyOn(issueTrackerUtils, 'initIssueTrackerObject');
-      method.apply(stub);
-
-      expect(issueTrackerUtils.initIssueTrackerObject.calls.count()).toEqual(1);
-      const callArgs = issueTrackerUtils.initIssueTrackerObject
-        .calls.mostRecent().args;
-
-      expect(callArgs[1]).toEqual(config);
-      expect(callArgs[2]).toEqual(true); // show issue tracker controls
+      method = Mixin.prototype.getConfig;
     });
 
+    it('should return object', () => {
+      const config = method.call(stub);
+      const isObject = config instanceof Object;
+      expect(isObject).toBe(true);
+    });
+
+    it('returned object should have "issueTrackerConfig" property', () => {
+      const config = method.call(stub);
+      const isConfigPropertyExist = config.issueTrackerConfig !== undefined;
+      expect(isConfigPropertyExist).toBe(true);
+    });
+
+    it('returned object should have "canUseIssueTracker" property', () => {
+      const config = method.call(stub);
+      const isCanUseITrPropertyExist = config.issueTrackerConfig !== undefined;
+      expect(isCanUseITrPropertyExist).toBe(true);
+    });
+
+    it('should show issue tracker if globally enabled and' +
+    ' turn off by default', () => {
+      GGRC.ISSUE_TRACKER_ENABLED = true;
+      const stub = makeFakeInstance({
+        model: Cacheable,
+      })();
+      const {issueTrackerConfig: {enabled}} = method.call(stub);
+      expect(enabled).toBe(false);
+    });
+
+    it('should show issue tracker if globally enabled and' +
+    ' set up default values', () => {
+      GGRC.ISSUE_TRACKER_ENABLED = true;
+      const {issueTrackerConfig: {enabled}} = method.call(stub);
+      expect(enabled).toBe(true);
+    });
 
     it('should hide issue tracker if globally disabled and' +
        ' turn off by default', () => {
       GGRC.ISSUE_TRACKER_ENABLED = false;
-      const stub = makeFakeInstance({model: Cacheable})();
+      const {issueTrackerConfig: {enabled}} = method.call(stub);
+      expect(enabled).toBe(true);
 
-      spyOn(issueTrackerUtils, 'initIssueTrackerObject');
-      method.apply(stub);
-
-      expect(issueTrackerUtils.initIssueTrackerObject.calls.count()).toEqual(0);
       expect(stub.attr('issue_tracker.enabled')).toBeFalsy();
+    });
+  });
+
+  describe('initIssueTracker() method', () => {
+    let method;
+    let stub;
+    let config;
+    let issueTrackerConfig;
+
+    beforeAll(() => {
+      GGRC.ISSUE_TRACKER_ENABLED = true;
+      method = Mixin.prototype.initIssueTracker;
+      issueTrackerConfig = {};
+      stub = makeFakeInstance({
+        model: Cacheable,
+      })();
+      config = {
+        issueTrackerConfig,
+        canUseIssueTracker: true,
+      };
+    });
+
+    it('should call "issueTrackerUtils.initIssueTrackerObject"', () => {
+      spyOn(issueTrackerUtils, 'initIssueTrackerObject');
+      method.call(stub, config);
+      const calls = issueTrackerUtils.initIssueTrackerObject.calls;
+      const callArgs = calls.mostRecent().args;
+
+      expect(calls.count()).toEqual(1);
+      expect(callArgs[1]).toEqual(issueTrackerConfig);
+      expect(callArgs[2]).toBe(true);
     });
   });
 
   describe('setDefaultHotlistAndComponent() method', () => {
     let method;
+    let stub;
 
     beforeAll(() => {
+      GGRC.ISSUE_TRACKER_ENABLED = true;
       method = Mixin.prototype.setDefaultHotlistAndComponent;
     });
 
-    it('should set up default hotlist and component ids', () => {
-      const stub = makeFakeInstance({
+    beforeEach(() => {
+      stub = makeFakeInstance({
         model: Cacheable,
         staticProps: {
           buildIssueTrackerConfig() {
@@ -102,9 +140,14 @@ describe('IssueTracker mixin', () => {
         },
         instanceProps: {
           issue_tracker: {},
+          getConfig() {
+            return Mixin.prototype.getConfig.call(this);
+          },
         },
       })();
+    });
 
+    it('should set up default hotlist and component ids', () => {
       method.apply(stub);
 
       expect(stub.issue_tracker.hotlist_id).toBe('hotlist_id');

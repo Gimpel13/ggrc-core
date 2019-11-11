@@ -4,31 +4,31 @@
 */
 
 import canMap from 'can-map';
-import Mixin from './mixin';
+import IssueTracker from './issue-tracker';
 import * as issueTrackerUtils from '../../plugins/utils/issue-tracker-utils';
 import {getPageInstance} from '../../plugins/utils/current-page-utils';
 import {reify} from '../../plugins/utils/reify-utils';
 
-export default class AssessmentIssueTracker extends Mixin {
+export default class AssessmentIssueTracker extends IssueTracker {
   'after:init'() {
-    this.initIssueTracker();
+    this.initIssueTracker(this.getConfig());
     this.trackAuditUpdates();
   }
 
   'before:refresh'() {
-    issueTrackerUtils.cleanUpWarnings(this);
+    super['before:refresh']();
   }
 
   beforeEnqueue() {
-    issueTrackerUtils.cleanUpBeforeSave(this);
-  }
-
-  afterRefresh() {
-    this.initIssueTracker();
+    super.beforeEnqueue();
   }
 
   afterSave() {
-    issueTrackerUtils.checkWarnings(this);
+    super.afterSave();
+  }
+
+  setDefaultHotlistAndComponent() { // eslint-disable-line id-length
+    super.setDefaultHotlistAndComponent();
   }
 
   trackAuditUpdates() {
@@ -40,22 +40,17 @@ export default class AssessmentIssueTracker extends Mixin {
 
     audit.bind('updated', (event) => {
       this.attr('audit', event.target);
-      this.initIssueTrackerForAssessment();
+      this.initIssueTracker(this.getConfig());
     });
   }
 
-  initIssueTracker() {
+  initIssueTracker({issueTrackerConfig, canUseIssueTracker}) {
     if (!GGRC.ISSUE_TRACKER_ENABLED) {
-      return $.Deferred().reject();
+      return;
     }
 
-    if (!this.attr('issue_tracker')) {
-      this.attr('issue_tracker', new canMap({}));
-    }
-
-    let audit = this.getParentAudit();
-    this.attr('audit', audit);
-    this.initIssueTrackerForAssessment();
+    super.initIssueTracker({issueTrackerConfig, canUseIssueTracker});
+    this.attr('audit', this.getParentAudit());
   }
 
   getParentAudit() {
@@ -73,38 +68,19 @@ export default class AssessmentIssueTracker extends Mixin {
     }
   }
 
-  /**
-   * Initializes Issue Tracker for Assessment and Assessment Template
-   */
-  initIssueTrackerForAssessment() { // eslint-disable-line id-length
-    let auditItr = this.attr('audit.issue_tracker') || {};
-    let itrEnabled = this.isNew()
-      // turned ON for Assessment & Assessment Template by default
-      // for newly created instances
-      ? (auditItr && auditItr.enabled)
-      // for existing instance, the value from the server will be used
-      : false;
-
-    let issueTitle = this.title || '';
-
-    let issueTracker = new canMap(auditItr).attr({
+  getConfig() {
+    const auditIssueTracker = this.attr('audit.issue_tracker') || {};
+    const canUseIssueTracker = auditIssueTracker.enabled;
+    const issueTrackerEnabled = this.isNew() && canUseIssueTracker;
+    // turned ON for Assessment & Assessment Template by default
+    // for newly created instances
+    // for existing instance, the value from the server will be used
+    const issueTitle = this.title || '';
+    const issueTrackerConfig = new canMap(auditIssueTracker).attr({
       title: issueTitle,
-      enabled: itrEnabled,
+      enabled: issueTrackerEnabled,
     });
-
-    issueTrackerUtils.initIssueTrackerObject(
-      this,
-      issueTracker,
-      auditItr.enabled
-    );
-  }
-
-  setDefaultHotlistAndComponent() { // eslint-disable-line id-length
-    let config = this.attr('audit.issue_tracker');
-    this.attr('issue_tracker').attr({
-      hotlist_id: config.hotlist_id,
-      component_id: config.component_id,
-    });
+    return {issueTrackerConfig, canUseIssueTracker};
   }
 
   issueCreated() {
@@ -113,8 +89,7 @@ export default class AssessmentIssueTracker extends Mixin {
   }
 
   issueTrackerEnabled() {
-    return this.attr('can_use_issue_tracker')
-      && issueTrackerUtils.isIssueTrackerEnabled(this);
+    return issueTrackerUtils.isIssueTrackerEnabled(this);
   }
 }
 

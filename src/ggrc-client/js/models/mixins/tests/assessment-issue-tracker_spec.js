@@ -4,17 +4,18 @@
 */
 
 import canMap from 'can-map';
-import * as issueTrackerUtils from '../../../plugins/utils/issue-tracker-utils';
 import {makeFakeInstance} from '../../../../js_specs/spec_helpers';
-import * as CurrentPageUtils from '../../../plugins/utils/current-page-utils';
+import * as currentPageUtils from '../../../plugins/utils/current-page-utils';
 import AssessmentIssueTracker from '../assessment-issue-tracker';
+import IssueTracker from '../issue-tracker';
 import Assessment from '../../business-models/assessment';
 
 describe('AssessmentIssueTracker mixin', () => {
   let Mixin;
   let audit;
+  const START_ENABLED_VALUE = GGRC.ISSUE_TRACKER_ENABLED;
 
-  beforeAll(function () {
+  beforeAll(() => {
     GGRC.ISSUE_TRACKER_ENABLED = true;
     Mixin = AssessmentIssueTracker;
 
@@ -29,21 +30,153 @@ describe('AssessmentIssueTracker mixin', () => {
     });
   });
 
+  afterAll(() => {
+    GGRC.ISSUE_TRACKER_ENABLED = START_ENABLED_VALUE;
+  });
+
+  describe('"getConfig" method', () => {
+    let method;
+    let fakeAudit;
+    let fakeAssessment;
+
+    beforeEach(function () {
+      fakeAudit = new canMap({
+        id: 1,
+        type: 'Audit',
+        issue_tracker: {
+          enabled: true,
+        },
+      });
+      fakeAssessment = new canMap({
+        audit: fakeAudit,
+        issue_tracker: {
+          enabled: null,
+        },
+        isNew() {
+          return !this.id;
+        },
+        getParentAudit() {
+          return fakeAudit;
+        },
+      });
+
+      method = Mixin.prototype.getConfig;
+    });
+
+    it('should return object', () => {
+      const config = method.call(fakeAssessment);
+      const isObject = config instanceof Object;
+
+      expect(isObject).toBe(true);
+    });
+
+    it('returned object should have "issueTrackerConfig" property', () => {
+      const config = method.call(fakeAssessment);
+      const isConfigPropertyExist = config.issueTrackerConfig !== undefined;
+
+      expect(isConfigPropertyExist).toBe(true);
+    });
+
+    it('returned object should have "canUseIssueTracker" property', () => {
+      const config = method.call(fakeAssessment);
+      const isCanUseITrPropertyExist = config.issueTrackerConfig !== undefined;
+
+      expect(isCanUseITrPropertyExist).toBe(true);
+    });
+
+    it('should show ITR if enabled in audit',
+      () => {
+        fakeAssessment.attr('audit.issue_tracker.enabled', true);
+
+        const {canUseIssueTracker} = method.call(fakeAssessment);
+
+        expect(canUseIssueTracker).toBe(true); // show issue tracker controls
+      });
+
+    it('should hide ITR if disabled in audit',
+      () => {
+        fakeAssessment.attr('audit.issue_tracker.enabled', false);
+
+        const {canUseIssueTracker} = method.call(fakeAssessment);
+
+        expect(canUseIssueTracker).toBe(false); // show issue tracker controls
+      });
+
+    it('should hide ITR if disabled in audit and enabled on instance',
+      () => {
+        fakeAssessment.attr('issue_tracker.enabled', true);
+        fakeAssessment.attr('audit.issue_tracker.enabled', false);
+
+        const {canUseIssueTracker} = method.call(fakeAssessment);
+
+        expect(canUseIssueTracker).toBe(false);
+      }
+    );
+
+    it('should hide ITR if disabled on instance and in audit', () => {
+      fakeAssessment.attr('issue_tracker.enabled', false);
+      fakeAssessment.attr('audit.issue_tracker.enabled', false);
+
+      const {canUseIssueTracker} = method.call(fakeAssessment);
+
+      expect(canUseIssueTracker).toBe(false);
+    });
+
+    it('should show ITR if enabled on instance and in audit', () => {
+      fakeAssessment.attr('issue_tracker.enabled', true);
+      fakeAssessment.attr('audit.issue_tracker.enabled', true);
+
+      const {canUseIssueTracker} = method.call(fakeAssessment);
+
+      expect(canUseIssueTracker).toBe(true);
+    });
+
+    it('should show ITR if disabled on instance and enabled in audit',
+      () => {
+        fakeAssessment.attr('issue_tracker.enabled', false);
+        fakeAssessment.attr('audit.issue_tracker.enabled', true);
+
+        const {canUseIssueTracker} = method.call(fakeAssessment);
+
+        expect(canUseIssueTracker).toBe(true);
+      }
+    );
+
+    it('should enable ITR if enabled in audit', () => {
+      fakeAssessment.attr('audit.issue_tracker.enabled', true);
+
+      const {issueTrackerConfig} = method.call(fakeAssessment);
+
+      expect(issueTrackerConfig.enabled).toBe(true); // turn on by default for assessment
+    });
+
+    it('should disable ITR if disable in audit', () => {
+      fakeAssessment.attr('audit.issue_tracker.enabled', false);
+
+      const {issueTrackerConfig} = method.call(fakeAssessment);
+
+      expect(issueTrackerConfig.enabled).toBe(false); // turn on by default for assessment
+    });
+  });
+
   describe('"after:init" event', () => {
     const asmtProto = Assessment.prototype;
 
-    it('should call "initIssueTrackerForAssessment" for audit', () => {
+    beforeAll(() => {
       spyOn(asmtProto, 'getParentAudit').and.returnValue(audit);
-      spyOn(asmtProto, 'initIssueTrackerForAssessment');
+    });
+
+    it('should call "initIssueTracker" for audit', () => {
+      spyOn(asmtProto, 'initIssueTracker');
       makeFakeInstance({model: Assessment})({type: 'Assessment'});
 
-      expect(asmtProto.initIssueTrackerForAssessment).toHaveBeenCalled();
+      expect(asmtProto.initIssueTracker).toHaveBeenCalled();
     });
 
     it('should call "trackAuditUpdates" method', () => {
-      spyOn(asmtProto, 'initIssueTracker');
       spyOn(asmtProto, 'trackAuditUpdates');
       makeFakeInstance({model: Assessment})({type: 'Assessment'});
+
       expect(asmtProto.trackAuditUpdates).toHaveBeenCalled();
     });
   });
@@ -60,30 +193,34 @@ describe('AssessmentIssueTracker mixin', () => {
     });
 
     it('should resolve to assigned audit property', function () {
-      let resolvedAudit = method.apply(assessment);
+      const resolvedAudit = method.call(assessment);
 
       expect(resolvedAudit).toEqual(audit);
     });
 
     it('should resolve to audit from page instance', function () {
-      spyOn(CurrentPageUtils, 'getPageInstance')
+      spyOn(currentPageUtils, 'getPageInstance')
         .and.returnValue(audit);
 
       assessment.isNew = () => true;
       assessment.attr('audit', null);
 
-      let resolvedAudit = method.apply(assessment);
+      const resolvedAudit = method.apply(assessment);
+
       expect(resolvedAudit).toEqual(audit);
     });
   });
 
-  describe('initIssueTrackerForAssessment() method [new assessment]', () => {
+  describe('initIssueTracker() method [new assessment]', () => {
     let method;
     let fakeAssessment;
     let fakeAudit;
+    let IssueTrackerProto;
+    let config;
 
     beforeAll(() => {
-      method = Mixin.prototype.initIssueTrackerForAssessment;
+      method = Mixin.prototype.initIssueTracker;
+      IssueTrackerProto = IssueTracker.prototype;
     });
 
     beforeEach(() => {
@@ -94,163 +231,88 @@ describe('AssessmentIssueTracker mixin', () => {
           enabled: true,
         },
       });
+
       fakeAssessment = new canMap({
         audit: fakeAudit,
         issue_tracker: {
           enabled: null,
         },
-        isNew() {
-          return !this.id;
+        getParentAudit() {
+          return fakeAudit;
         },
       });
 
-      spyOn(issueTrackerUtils, 'initIssueTrackerObject');
+      config = {
+        issueTrackerConfig: {},
+        canUseIssueTracker: true,
+      };
+
+      spyOn(IssueTrackerProto, 'initIssueTracker');
     });
 
-    it('should show ITR if enabled in audit',
-      () => {
-        fakeAssessment.attr('audit.issue_tracker.enabled', true);
-        method.apply(fakeAssessment);
+    it('should call "initIssueTracker" of "IssueTracker" if' +
+      'issue tracker globally enabled', () => {
+      GGRC.ISSUE_TRACKER_ENABLED = true;
+      method.call(fakeAssessment, config);
 
-        const itrShowControls = issueTrackerUtils.initIssueTrackerObject
-          .calls.mostRecent().args[2];
-        expect(itrShowControls).toEqual(true); // show issue tracker controls
-      });
-
-    it('should hide ITR if disabled in audit',
-      () => {
-        fakeAssessment.attr('audit.issue_tracker.enabled', false);
-        method.apply(fakeAssessment);
-
-        const itrShowControls = issueTrackerUtils.initIssueTrackerObject
-          .calls.mostRecent().args[2];
-        expect(itrShowControls).toEqual(false); // show issue tracker controls
-      });
-
-    it('should enable ITR if enabled in audit', () => {
-      fakeAssessment.attr('audit.issue_tracker.enabled', true);
-      method.apply(fakeAssessment);
-
-      const itrConfig = issueTrackerUtils.initIssueTrackerObject
-        .calls.mostRecent().args[1];
-
-      expect(itrConfig.enabled).toEqual(true); // turn on by default for assessment
+      expect(IssueTrackerProto.initIssueTracker.calls.count()).toBe(1);
     });
 
-    it('should disable ITR if disable in audit', () => {
-      fakeAssessment.attr('audit.issue_tracker.enabled', false);
-      method.apply(fakeAssessment);
+    it('should not call "initIssueTracker" of "IssueTracker" if' +
+      'issue tracker globally disenabled', () => {
+      GGRC.ISSUE_TRACKER_ENABLED = false;
+      method.call(fakeAssessment, config);
 
-      const itrConfig = issueTrackerUtils.initIssueTrackerObject
-        .calls.mostRecent().args[1];
+      expect(IssueTrackerProto.initIssueTracker.calls.count()).toBe(0);
+    });
 
-      expect(itrConfig.enabled).toEqual(false); // turn on by default for assessment
+    it('should call "getParentAudit" method if' +
+    'issue tracker globally enabled', () => {
+      spyOn(fakeAssessment, 'getParentAudit');
+      GGRC.ISSUE_TRACKER_ENABLED = true;
+      method.call(fakeAssessment, config);
+
+      expect(fakeAssessment.getParentAudit.calls.count()).toBe(1);
+    });
+
+    it('should not call "getParentMethod" if' +
+      'issue tracker globally disenabled', () => {
+      GGRC.ISSUE_TRACKER_ENABLED = false;
+      method.call(fakeAssessment, config);
+
+      expect(IssueTrackerProto.initIssueTracker.calls.count()).toBe(0);
     });
   });
 
-  describe('initIssueTrackerForAssessment() method [existing assessment]',
-    () => {
-      let method;
-      let fakeAssessment;
-      let fakeAudit;
-
-      beforeAll(() => {
-        method = Mixin.prototype.initIssueTrackerForAssessment;
-      });
-
-      beforeEach(() => {
-        fakeAudit = new canMap({
-          id: 1,
-          type: 'Audit',
-          issue_tracker: {
-            enabled: true,
-          },
-        });
-        fakeAssessment = new canMap({
-          id: 123,
-          audit: fakeAudit,
-          issue_tracker: {
-            enabled: null,
-          },
-          isNew() {
-            return !this.id;
-          },
-        });
-
-        spyOn(issueTrackerUtils, 'initIssueTrackerObject');
-      });
-
-      it('should hide ITR if disabled in audit and enabled on instance',
-        () => {
-          let itrShowControls;
-          fakeAssessment.attr('issue_tracker.enabled', true);
-
-          // disabled in Audit
-          fakeAssessment.attr('audit.issue_tracker.enabled', false);
-          method.apply(fakeAssessment);
-          itrShowControls = issueTrackerUtils.initIssueTrackerObject
-            .calls.mostRecent().args[2];
-          expect(itrShowControls).toEqual(false);
-        }
-      );
-
-      it('should hide ITR if disabled on instance and in audit', () => {
-        let itrShowControls;
-        fakeAssessment.attr('issue_tracker.enabled', false);
-
-        // disabled in Audit
-        fakeAssessment.attr('audit.issue_tracker.enabled', false);
-        method.apply(fakeAssessment);
-        itrShowControls = issueTrackerUtils.initIssueTrackerObject
-          .calls.mostRecent().args[2];
-        expect(itrShowControls).toEqual(false);
-      });
-
-      it('should show ITR if enabled on instance and in audit', () => {
-        let itrShowControls;
-        fakeAssessment.attr('issue_tracker.enabled', true);
-
-        // enabled in Audit
-        fakeAssessment.attr('audit.issue_tracker.enabled', true);
-        method.apply(fakeAssessment);
-        itrShowControls = issueTrackerUtils.initIssueTrackerObject
-          .calls.mostRecent().args[2];
-        expect(itrShowControls).toEqual(true);
-      });
-
-      it('should show ITR if disabled on instance and enabled in audit',
-        () => {
-          let itrShowControls;
-          fakeAssessment.attr('issue_tracker.enabled', false);
-
-          // enabled in Audit
-          fakeAssessment.attr('audit.issue_tracker.enabled', true);
-          method.apply(fakeAssessment);
-          itrShowControls = issueTrackerUtils.initIssueTrackerObject
-            .calls.mostRecent().args[2];
-          expect(itrShowControls).toEqual(true);
-        }
-      );
-    }
-  );
-
   describe('setDefaultHotlistAndComponent() method', () => {
     let method;
+    let stub;
+    let IssueTrackerProto;
 
     beforeAll(() => {
+      GGRC.ISSUE_TRACKER_ENABLED = true;
       method = Assessment.prototype.setDefaultHotlistAndComponent;
+      spyOn(Assessment.prototype, 'getParentAudit').and.returnValue(audit);
+      stub = makeFakeInstance({model: Assessment})();
+      IssueTrackerProto = IssueTracker.prototype;
+    });
+
+    it('should call "setDefaultHotlistAndComponent" method' +
+      'of "IssueTracker"', () => {
+      spyOn(IssueTrackerProto, 'setDefaultHotlistAndComponent');
+      method.call(stub);
+
+      expect(IssueTrackerProto.setDefaultHotlistAndComponent.calls.count())
+        .toBe(1);
     });
 
     it('should set up default hotlist and component ids', () => {
-      spyOn(Assessment.prototype, 'getParentAudit').and.returnValue(audit);
-      const stub = makeFakeInstance({model: Assessment})();
-
       stub.attr('issue_tracker').attr({
         hotlist_id: null,
         component_id: null,
       });
 
-      method.apply(stub);
+      method.call(stub);
 
       expect(stub.issue_tracker.hotlist_id).toBe('hotlist_id');
       expect(stub.issue_tracker.component_id).toBe('component_id');
