@@ -18,6 +18,16 @@ import * as AjaxUtils from '../../../plugins/ajax_extensions';
 const ENDPOINT = '/api/related_assessments';
 
 describe('RelatedAssessmentsLoader mixin', () => {
+  const START_ENABLED_VALUE = GGRC.ISSUE_TRACKER_ENABLED;
+
+  beforeAll(() => {
+    GGRC.ISSUE_TRACKER_ENABLED = false;
+  });
+
+  afterAll(() => {
+    GGRC.ISSUE_TRACKER_ENABLED = START_ENABLED_VALUE;
+  });
+
   beforeEach(() => {
     spyOn(AjaxUtils, 'ggrcGet');
   });
