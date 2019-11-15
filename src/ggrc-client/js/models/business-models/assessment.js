@@ -366,7 +366,6 @@ export default Cacheable.extend({
               delete this._pending_refresh;
               if (model) {
                 model = this.constructor.model(model, this);
-                this.afterRefresh && this.afterRefresh();
                 model.backup();
                 return model;
               }

@@ -645,10 +645,6 @@ export default canModel.extend({
               }
               return that.constructor.model(response);
             })
-            .then((model) => {
-              that.afterRefresh && that.afterRefresh();
-              return model;
-            })
             .done(function (response) {
               response.backup();
               stopFn();
