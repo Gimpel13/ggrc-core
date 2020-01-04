@@ -63,6 +63,7 @@ export default canComponent.extend({
     currentExports: [],
     disabledItems: {},
     timeout: PRIMARY_TIMEOUT,
+    errorMessages: [],
     getInProgressJobs() {
       return this.attr('currentExports').filter((el) => {
         return el.status === jobStatuses.IN_PROGRESS;
@@ -71,20 +72,21 @@ export default canComponent.extend({
     getExports(ids) {
       return getExportsHistory(ids)
         .then((exports) => {
+          const currentExports = this.attr('currentExports');
           if (ids) {
-            let exportsMap = exports
+            const exportsMap = exports
               .reduce((map, job) => {
                 map[job.id] = job.status;
                 return map;
               }, {});
 
-            this.attr('currentExports').forEach((job) => {
+            currentExports.forEach((job) => {
               if (exportsMap[job.id]) {
                 job.attr('status', exportsMap[job.id]);
               }
             });
           } else {
-            this.attr('currentExports').replace(exports);
+            currentExports.replace(exports);
           }
           if (this.getInProgressJobs().length) {
             this.attr('timeout', SECONDARY_TIMEOUT);
@@ -94,6 +96,11 @@ export default canComponent.extend({
             this.attr('isInProgress', false);
             this.attr('timeout', PRIMARY_TIMEOUT);
           }
+          currentExports.forEach(({status, results: {errors}}) => {
+            if (status === 'Failed') {
+              this.attr('errorMessages', errors || []);
+            }
+          });
         })
         .fail((jqxhr, textStatus, errorThrown) => {
           if (isConnectionLost()) {
