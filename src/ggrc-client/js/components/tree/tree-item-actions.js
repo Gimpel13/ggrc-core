@@ -111,6 +111,16 @@ const ViewModel = canDefineMap.extend({
       return !denyEditAndMap && !!mappingTypes.length;
     },
   },
+  isShowOpenInNewTab: {
+    type: 'boolean',
+    get() {
+      const instance = this.instance;
+
+      return instance.viewLink &&
+        !this.isSnapshot &&
+        (instance.type !== 'CycleTaskGroupObjectTask');
+    },
+  },
   maximizeObject(scope, el, ev) {
     ev.preventDefault();
     ev.stopPropagation();

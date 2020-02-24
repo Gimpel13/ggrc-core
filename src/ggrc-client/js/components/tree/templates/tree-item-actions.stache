@@ -20,17 +20,14 @@
         </li>
 
         {{^if showReducedOptions}}
-
-          {{#if instance.viewLink}}
-            {{#unless isSnapshot}}
-              <!-- Link for open instance on new Browser tab -->
-              <li>
-                <a href="{{instance.viewLink}}" target="_blank" on:el:click="openObject">
-                  <i class="fa fa-long-arrow-right"></i>
-                  Open in a new tab
-                </a>
-              </li>
-            {{/unless}}
+          {{#if isShowOpenInNewTab}}
+            <!-- Link for open instance on new Browser tab -->
+            <li>
+              <a href="{{instance.viewLink}}" target="_blank" on:el:click="openObject">
+                <i class="fa fa-long-arrow-right"></i>
+                Open in a new tab
+              </a>
+            </li>
           {{/if}}
 
           {{#if instance.constructor.isChangeableExternally}}
