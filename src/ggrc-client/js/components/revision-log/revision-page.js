@@ -34,6 +34,7 @@ import Stub from '../../models/stub';
 import {formatDate} from '../../plugins/utils/date-utils';
 import {reify} from '../../plugins/utils/reify-utils';
 
+
 const EMPTY_DIFF_VALUE = '—';
 
 let DATE_FIELDS = {
