@@ -10,6 +10,7 @@ from sqlalchemy import orm
 from ggrc import db
 from ggrc import builder
 from ggrc.access_control.roleable import Roleable
+from ggrc.access_control import role as ACR
 from ggrc.fulltext import attributes
 from ggrc.models.comment import Commentable
 from ggrc.models.deferred import deferred
@@ -24,6 +25,10 @@ from ggrc.models.relationship import Relatable
 from ggrc.models import reflection
 from ggrc.fulltext.mixin import Indexed
 from ggrc.integrations import constants
+
+
+IMMUTABLE_UPDATE_ATTRIBUTES = ['description', 'title']
+IMMUTABLE_UPDATE_ACL_ATTRIBUTES = ['Secondary Contacts']
 
 
 class Issue(Roleable,
@@ -67,6 +72,12 @@ class Issue(Roleable,
                            create=False,
                            update=False),
       reflection.Attribute("due_date"),
+      reflection.Attribute("immutable_update_attributes",
+                           create=False,
+                           update=False),
+      reflection.Attribute("immutable_update_acl_attributes",
+                           create=False,
+                           update=False),
   )
 
   _aliases = {
@@ -165,3 +176,17 @@ class Issue(Roleable,
     if not value:
       raise ValueError("Due Date for the issue is not specified")
     return value
+
+  @builder.simple_property
+  def immutable_update_attributes(self):
+    return IMMUTABLE_UPDATE_ATTRIBUTES
+
+  @builder.simple_property
+  def immutable_update_acl_attributes(self):
+    result = []
+    roles = ACR.get_ac_roles_data_for(self.__class__.__name__)
+    for item in IMMUTABLE_UPDATE_ACL_ATTRIBUTES:
+      if item in roles:
+        acl_role = {'id': roles[item][0], 'name': roles[item][1]}
+        result.append(acl_role)
+    return result

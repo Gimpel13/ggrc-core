@@ -58,6 +58,7 @@ from ggrc.utils import errors as ggrc_errors
 from ggrc.utils import format_api_error_response
 from ggrc.utils import as_json, benchmark, dump_attrs
 from ggrc.utils.log_event import log_event
+from ggrc.utils.revisions_diff import builder
 
 
 # pylint: disable=invalid-name
@@ -634,6 +635,51 @@ class Resource(ModelView):
     # pylint: disable=unused-argument
     return
 
+  def _check_update_permissions(self, obj, src):
+    immutable_update_acl_attributes = getattr(
+        obj, 'immutable_update_acl_attributes', []
+    )
+    immutable_update_attributes = getattr(
+        obj, 'immutable_update_attributes', []
+    )
+    if immutable_update_acl_attributes:
+      if not self._can_update_immutable_acl_attrs(obj, src):
+        raise Forbidden()
+
+    if immutable_update_attributes:
+      if not self._can_update_immutable_attrs(obj, src):
+        raise Forbidden()
+    return
+
+  @staticmethod
+  def _can_update_immutable_acl_attrs(obj, src):
+    acl_diff = builder.prepare(obj, src)['access_control_list']
+    if not acl_diff:
+      return True
+    current_user = get_current_user(use_external_user=False)
+    current_user_role = current_user.system_wide_role
+    user_can_edit = current_user_role in ['Superuser', 'Administrator']
+    immutable_acl_attrs = obj.immutable_update_acl_attributes
+
+    for attr in immutable_acl_attrs:
+      if attr['id'] in acl_diff and not user_can_edit:
+        return False
+
+    return True
+
+  @staticmethod
+  def _can_update_immutable_attrs(obj, src):
+    immutable_attrs = obj.immutable_update_attributes
+    current_user = get_current_user(use_external_user=False)
+    current_user_role = current_user.system_wide_role
+    user_can_edit = current_user_role in ['Superuser', 'Administrator']
+
+    for attr in immutable_attrs:
+      if getattr(obj, attr) != src[attr] and not user_can_edit:
+        return False
+
+    return True
+
   @staticmethod
   def _validate_method_fields_restriction(obj, src):
     """Validate input data by method, and fields"""
@@ -693,6 +739,9 @@ class Resource(ModelView):
 
     with benchmark("Validate method field restriction"):
       self._validate_method_fields_restriction(obj, src)
+
+    with benchmark("Check update permissions"):
+      self._check_update_permissions(obj, src)
 
     with benchmark("Deserialize object"):
       self.json_update(obj, src)
