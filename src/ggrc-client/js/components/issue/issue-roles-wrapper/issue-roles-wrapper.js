@@ -15,9 +15,11 @@ export default canComponent.extend({
     define: {
       disabledRoles: {
         get() {
+          const alwaysDisabledRoles =
+            Array.from(this.attr('alwaysDisabledRoles') || []);
           return this.attr('disable')
-            ? DISABLED_ROLES
-            : [];
+            ? [...DISABLED_ROLES, ...alwaysDisabledRoles]
+            : [...alwaysDisabledRoles];
         },
       },
       rolesTooltips: {

@@ -63,6 +63,8 @@ export default Cacheable.extend({
   },
   defaults: {
     status: 'Draft',
+    immutable_update_attributes: [],
+    immutable_update_acl_attributes: [],
   },
   statuses: ['Draft', 'Deprecated', 'Active', 'Fixed', 'Fixed and Verified'],
   unchangeableIssueTrackerIdStatuses:
