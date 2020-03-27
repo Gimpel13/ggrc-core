@@ -11,6 +11,8 @@
       date:bind="instance.start_date"
       setMaxDate:from="instance.end_date"
       helptext:from="configStartDate.helpText"
+      readonly:from="readonly"
+      disabled:from="disabled"
       {{#configStartDate.required}}required:from="true"{{/configStartDate.required}}
   />
 </div>

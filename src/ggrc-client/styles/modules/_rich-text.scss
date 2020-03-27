@@ -6,6 +6,11 @@
 rich-text {
   display: block;
 
+  &.is-disabled {
+    background: $tabBgnd;
+    opacity: 0.47;
+  }
+
   .rich-text__wrapper {
     border: 1px solid $warmGray;
     border-radius: 2px;

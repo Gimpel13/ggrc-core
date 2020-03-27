@@ -12,7 +12,7 @@
           instance:from="instance"
           urls:bind="documents"
           isDisabled:from="isLoading"
-          isNotEditable:from="isSnapshot"
+          isNotEditable:from="readOnlyFields.related_urls"
           isSnapshot:from="isSnapshot"
           on:createUrl="createRelatedDocument(scope.event.payload)"
           on:removeUrl="removeRelatedDocument(scope.event.payload)">

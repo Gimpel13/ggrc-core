@@ -20,7 +20,16 @@
                 <i class="fa fa-asterisk"></i>
                 <i class="fa fa-question-circle" rel="tooltip" title="Give new {{model.title_plural}} a name that's easy to search for and indicates the main goals of this {{model.title_singular}}."></i>
               </label>
-              <input tabindex="1" class="input-block-level" placeholder="Enter Title" name="title" type="text" value="{{title}}" autofocus>
+                <input 
+                  tabindex="1"
+                  class="input-block-level"
+                  placeholder="Enter Title"
+                  name="title"
+                  type="text"
+                  value="{{title}}"
+                  autofocus
+                  {{#if readonlyFields.title}}readonly{{/if}}
+                />
               {{#instance.computed_errors.title}}<label class="help-inline warning">{{this}}</label>{{/instance.computed_errors.title}}
             </div>
           </div>
@@ -34,10 +43,13 @@
               <a href="javascript://" class="field-hide" tabindex="-1">hide</a>
               <div class="rich-text">
                   <rich-text
+                    class="{{#if readonlyFields.description}}is-disabled{{/if}}"
                     tabindex="2"
                     hiddenToolbar:from="true"
                     placeholder:from="'Enter Description'"
-                    content:bind="instance.description">
+                    content:bind="instance.description"
+                    disabled:from="readonlyFields.description"
+                  >
                   </rich-text>
               </div>
             </div>
@@ -52,10 +64,13 @@
               <a href="javascript://" class="field-hide" tabindex="-1">hide</a>
               <div class="rich-text">
                   <rich-text
+                    class="{{#if readonlyFields.test_plan}}is-disabled{{/if}}"
                     tabindex="2"
                     hiddenToolbar:from="true"
                     placeholder:from="'Enter Remediation Plan'"
-                    content:bind="instance.test_plan">
+                    content:bind="instance.test_plan"
+                    disabled:from="readonlyFields.test_paln"
+                  >
                   </rich-text>
               </div>
             </div>
@@ -64,6 +79,7 @@
           <div class="row">
             <div class="span12 hide-wrap">
               <issue-roles-wrapper
+                alwaysDisabledRoles:from="readonlyFields.roles"
                 disable:from="disableIssueTrackerDependentFields">
                 <access-control-list-roles-helper
                   instance:from="instance"
@@ -85,10 +101,13 @@
               <a href="javascript://" class="field-hide" tabindex="-1">hide</a>
               <div class="rich-text">
                   <rich-text
+                    class="{{#if readonlyFields.notes}}is-disabled{{/if}}"
                     tabindex="5"
                     hiddenToolbar:from="true"
                     placeholder:from="'Enter Notes'"
-                    content:bind="instance.notes">
+                    content:bind="instance.notes"
+                    disabled:from="readonlyFields.notes"
+                  >
                   </rich-text>
               </div>
             </div>
@@ -101,7 +120,12 @@
 
           <div class="row-fluid">
             <div class="span6 hidable" data-hide-title="Attachments">
-              <ggrc-gdrive-folder-picker instance:from="instance" deferred:from="true" tabindex="6">
+              <ggrc-gdrive-folder-picker 
+                readonly:from="readonlyFields.attachments"
+                instance:from="instance"
+                deferred:from="true"
+                tabindex="6"
+              >
               </ggrc-gdrive-folder-picker>
             </div>
           </div>
@@ -118,12 +142,23 @@
                 </div>
               {{/if}}
               <div class="span4 hidable input-block-level" data-hide-title="Effective Date">
-                <effective-dates instance:from="instance"></effective-dates>
+                <effective-dates 
+                  instance:from="instance"
+                  readonly:from="readonlyFields.start_date"
+                  disabled:from="readonlyFields.start_date"
+                >
+                </effective-dates>
               </div>
               <div class="span4 input-block-level {{#instance.computed_errors.due_date}}field-failure{{/instance.computed_errors.due_date}}">
-                <datepicker-component id="issue-due-date" date:bind="instance.due_date"
-                                      label:from="'Due Date'" required:from="true" tabindex="21">
-                </datepicker-component>
+                  <datepicker-component
+                    id="issue-due-date"
+                    date:bind="instance.due_date"
+                    label:from="'Due Date'"
+                    required:from="true"
+                    tabindex="21"
+                    readonly:from="readonlyFields.due_date"
+                    disabled:from="readonlyFields.due_date"
+                  />
                 {{#instance.computed_errors.due_date}}
                   <label class="help-inline">{{this}}</label>
                 {{/instance.computed_errors.due_date}}

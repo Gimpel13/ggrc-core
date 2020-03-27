@@ -6,9 +6,12 @@
 {{#instance}}
   {{^if readonly}}
     <div class="row-fluid wrap-row">
-      <folder-attachments-list title:from="'Attachment'"
-                              instance:from="instance"
-                              isSnapshot:from="isSnapshot">
+      <folder-attachments-list 
+        title:from="'Attachment'"
+        instance:from="instance"
+        isSnapshot:from="isSnapshot"
+        isNotEditable:from="readOnlyFields.folderAttachments"
+        >
       </folder-attachments-list>
     </div>
   {{/if}}

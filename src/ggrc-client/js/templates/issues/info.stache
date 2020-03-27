@@ -26,7 +26,7 @@
                     <div class="row-fluid wrap-row">
                       <inline-edit-control
                         on:vm:inlineSave="saveInlineForm(scope.event)"
-                        isEditIconDenied:from="isInfoPaneReadonly"
+                        isEditIconDenied:from="readonlyFields.description"
                         type:from="'text'"
                         propName:from="'description'"
                         withReadMore:from="true"
@@ -44,7 +44,7 @@
                     <div class="row-fluid wrap-row">
                       <inline-edit-control
                         on:vm:inlineSave="saveInlineForm(scope.event)"
-                        isEditIconDenied:from="isInfoPaneReadonly"
+                        isEditIconDenied:from="readonlyFields.test_plan"
                         type:from="'text'"
                         propName:from="'test_plan'"
                         withReadMore:from="true"
@@ -62,7 +62,7 @@
                     <div class="row-fluid wrap-row">
                       <inline-edit-control
                         on:vm:inlineSave="saveInlineForm(scope.event)"
-                        isEditIconDenied:from="isInfoPaneReadonly"
+                        isEditIconDenied:from="readonlyFields.notes"
                         type:from="'text'"
                         propName:from="'notes'"
                         withReadMore:from="true"
@@ -80,7 +80,9 @@
                     <div class="row-fluid wrap-row">
                       <div>
                         <issue-roles-wrapper
-                          disable:from="disableIssueTrackerDependentFields">
+                          disable:from="disableIssueTrackerDependentFields"
+                          alwaysDisabledRoles:from="readonlyFields.roles"
+                        >
                           <custom-roles
                             instance:from="instance"
                             disabledRoles:from="disabledRoles">
@@ -121,7 +123,7 @@
                           <div class="span4">
                             <inline-edit-control
                               on:vm:inlineSave="saveInlineForm(scope.event)"
-                              isEditIconDenied:from="isInfoPaneReadonly"
+                              isEditIconDenied:from="readonlyFields.start_date"
                               type:from="'date'"
                               propName:from="'start_date'"
                               value:from="start_date">
@@ -154,7 +156,7 @@
                           <div class="ggrc-form ggrc-form-legacy ggrc-form-multiple-columns">
                               <div class="info-pane__section-ticket-tracker width-100">
                                 <info-pane-issue-tracker-fields
-                                  isEditIconDenied:from="isInfoPaneReadonly"
+                                  isEditIconDenied:from="readonlyFields.issue_tracker"
                                   instance:from="instance"
                                   note:from="'Turns on Ticket Tracker integration. Any subsequent updates to admins, primary contacts, secondary contacts and state fields should be made through tracking system and will be synced automatically to GGRC.'"
                                   linkingNote:from="'If you would like to keep the existing bug linked to this issue do not edit this attribute. If you would like to link to a different ticket, either clear this attribute to generate new or provide an existing ticket number.'"
@@ -167,7 +169,7 @@
                           <div class="span4">
                             <inline-edit-control
                               on:vm:inlineSave="saveInlineForm(scope.event)"
-                              isEditIconDenied:from="isInfoPaneReadonly"
+                              isEditIconDenied:from="readonlyFields.due_date"
                               mandatory:from="true"
                               type:from="'date'"
                               propName:from="'due_date'"

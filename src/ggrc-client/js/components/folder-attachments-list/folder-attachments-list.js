@@ -32,7 +32,9 @@ const ViewModel = canDefineMap.extend({
       }
 
       let isSnapshot = this.isSnapshot;
-      return isSnapshot || !isAllowedFor('update', instance);
+      return isSnapshot ||
+        this.isNotEditable ||
+        !isAllowedFor('update', instance);
     },
   },
   showMore: {

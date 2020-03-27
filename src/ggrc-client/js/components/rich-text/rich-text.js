@@ -105,6 +105,7 @@ const ViewModel = canDefineMap.extend({
             },
           },
         });
+        editor.enable(!this.disabled);
         this.setContentToEditor(editor, this.content);
 
         if (this.maxLength) {

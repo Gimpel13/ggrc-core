@@ -17,6 +17,7 @@
         instance:from="instance"
         allowToRemove:from="new_object_form"
         urls:bind="documents"
+        isNotEditable:from="readOnlyFields.reference_urls"
         isDisabled:from="isLoading"
         on:createUrl="markDocumentForAddition(scope.event.payload)"
         on:removeUrl="markDocumentForDeletion(scope.event.payload)">
