@@ -3,9 +3,9 @@
     Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
 */
 
-module.exports = function(html) {
-  let headerRegexp = /<h2>(.*)<\/h2>/g;
-  let headerMatches = [];
+module.exports = function (html) {
+  const headerRegexp = /<h2>(.*)<\/h2>/g;
+  const headerMatches = [];
   let result;
 
   // find all links
@@ -14,21 +14,15 @@ module.exports = function(html) {
   }
 
   headerMatches.forEach((match, index) => {
-    let hash = (Date.now() * Math.random()).toFixed();
-    let innerText = match[1];
-    let anchorStr = `<h3>${innerText}<\/h3>`;
-    let headerStr = `<h2>${innerText}<\/h2>`;
+    const innerText = match[1];
+    const anchorStr = `<h2>${innerText}<\/h2>`;
 
     if (html.indexOf(anchorStr) > -1) {
       // set hash as id for anchor header
       html = html.replace(anchorStr,
-        `<h3 id="${hash}">${innerText}<\/h3>`);
-
-      // replace h2 header by link with hash
-      html = html.replace(headerStr,
-        `<p><a href="#${hash}">${innerText}<\/a></p>`);
+        `<h2 id="${index}-id">${innerText}<\/h2>`);
     }
   });
 
   return html;
-}
+};
