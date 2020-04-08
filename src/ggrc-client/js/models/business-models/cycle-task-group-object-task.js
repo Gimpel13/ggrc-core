@@ -17,6 +17,7 @@ import IsOverdue from '../mixins/is-overdue';
 import AccessControlList from '../mixins/access-control-list';
 import CaUpdate from '../mixins/ca-update';
 import CycleTaskNotifications from '../mixins/notifications/cycle-task-notifications';
+import Verifiable from '../mixins/verifiable';
 import Stub from '../stub';
 import {reify} from '../../plugins/utils/reify-utils';
 import {refreshAll} from '../../models/refresh-queue';
@@ -81,6 +82,7 @@ export default Cacheable.extend({
     AccessControlList,
     CaUpdate,
     CycleTaskNotifications,
+    Verifiable,
   ],
   category: 'workflow',
   findAll: 'GET /api/cycle_task_group_object_tasks',
@@ -92,6 +94,12 @@ export default Cacheable.extend({
   title_plural: 'Cycle Tasks',
   name_singular: 'Task',
   name_plural: 'Tasks',
+  defaults: {
+    overdueOption: {
+      endDateFields: ['end_date'],
+      doneState: 'Finished',
+    },
+  },
   attributes: {
     cycle_task_group: Stub,
     task_group_task: Stub,
