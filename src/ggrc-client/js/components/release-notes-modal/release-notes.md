@@ -1,144 +1,24 @@
 [//]: <> (updated 02/24/2020)
 
-Our product team is working hard to engineer compliance @ scale and make your day to day user journeys easier. We have been adding key capabilities to the product as listed here below.
-
-## Disable scope objects in the old interface (v2.25.0, 02/24/2020)
-
-## An access to the maintenance schedules from the UI (v2.24.0, 01/10/2020)
-
-## Bulk verify assessments (v2.23.0, 12/16/2019)
-
-## A New Assessment type for the SOX 302 Certification is now available in GGRC (v2.22.0, 12/2/2019)
-
-## Additional description for an evidence (v2.21.0, 12/2/2019)
-
-## Ability to create a new Cycle Task Group during active Cycle (v2.20.0, 10/29/2019)
-
-## Administration of Global Custom Attributes for Controls and Risks is moved to the new frontend (v2.17.0, 10/1/2019)
-
-## Create a single Assessment with custom attributes from an Assessment Template (v2.10.0, 07/31/2019)
-
-## Ability to save searches (v2.9.0, 07/23/2019)
-
-## New rules for Ticket Tracker integration for Assessments (v2.8.0, 07/16/2019)
-
-## Custom Attributes of the Person type are no longer available  (v2.8.0, 07/16/2019)
-
-## Introducing ‘Propose changes’ on Programs (v2.7.0, 07/01/2019)
-
-## Possibility to revert to any version of a Program (v2.7.0, 07/01/2019)
-
-## Past Evidence can be marked as ‘Deprecated’ (v2.7.0, 07/01/2019)
-
-## Introducing the ‘Multiselect’ attribute on Assessment templates (v2.7.0, 07/01/2019)
-
-## Introducing new Risk Library frontend (v.2.6.0, 06/18/2019)
-
-## Integration with Drogon enabled for SOX systems (v.2.5.0, 05/22/2019)
-
-## Mapping Scope Object to Standard or Regulation moved to new frontend (v.2.5.0, 05/22/2019)
-
-## Introducing Program to Program mapping (Mega Program) (v.2.3.0, 05/03/2019)
-
-## A functionality to turn off sync of people fields between Assessment and Ticket tracker (v.2.3.0, 05/03/2019)
-
-## Mentioning person enabled at comments (v.2.2.0, 04/24/2019)
-
-## New object Account Balance (v.2.1.0, 04/10/2019)
-
-## Introducing new Control Library frontend (v.2.0.0, 03/26/2019)
-
-## ‘Related Requirements’ added to snapshot (v.2.0.0, 03/26/2019)
-
-## Introduced new object ‘Key report’ (v.1.41.0, 02/19/2019)
-
-## Changes at synchronization logic with Ticket Tracker (v.1.39.0, 02/05/2019)
-
-## Calendar events added for tasks (v.1.38.0, 01/16/2019)
-
-## Added a checkbox in Audit ‘Create screen’ to map snapshots manually (v.1.38.0, 01/16/2019)
-
-## Primary and Secondary Contacts in Control object are renamed (v.1.35.0, 12/20/2018)
-
-## You can now import ticket tracker integration settings for assessments and issues (v1.32.0, 11/28/2018)
-
-## New roles for scoping objects (v1.29.0, 10/30/2018)
-
-## Link existing tickets to track assessments and issues (v1.28.0, 10/24/2018)
-
-## Changes to the mapping flow from scope to directives (v1.25.0, 10/04/2018)
-
-## Enhanced object review flow (v1.24.0, 09/26/2018)
-
-## Linking assessments with other issue tracking systems in bulk (v1.23.0, 09/18/2018)
-
-## Roles reorganization for scoping objects (v1.22.0, 09/18/2018)
-
-## New roles for scoping objects (v1.19.0, 08/23/2018)
-
-## Due Date for Issue object (v1.18.0, 08/14/2018)
-
-## Requirement object type (v1.17.0, 08/07/2018)
-
-## Linking issue object with other issue tracking systems (v1.16.0, 07/31/2018)
-
-## New scoping objects (v1.15.0, 07/12/2018)
-
-## Document object (v1.13.0, 06/19/2018)
-
-## Disable some automatic mapping rules (v1.12.0, 06/13/2018)
-
-## Evidences for Assessments and Audits (v1.11.0, 05/30/2018)
-
-## Offline mode for Import and export (v1.9.0, 04/25/2018)
-
-## Re-use assessment templates across different Audits (v1.6.0, 03/15/2018)
-
-## No more automatic mappings from Objective-Objective and Control-Control relationships (v1.6.0, 03/15/2018)
-
-## Auto-copying of assessment procedure (v1.4.0, 02/22/2018)
-
-## Task secondary assignees (v1.3.0, 02/12/2018)
-
-## Improvements to RBAC model (v1.3.0, 02/12/2018)
-
-## Piper / Git style lite weight versioning on objects like Controls & Risks (v1.2.0, 01/24/2018)
-
-## Versioning functionality for Controls & Risks with ability to roll back to any previous version (v1.2.0, 01/24/2018)
-
-## Reverting assessments to ‘In Progress’ state (v1.0.0, 01/04/2018)
-
-## Labeling assessments (v1.0.0, 01/04/2018)
-
-## Improvements to surfacing ‘related assessments’ (v0.10.37, 12/20/2017)
-
-## Extend assessment assignees rights (v0.10.37, 12/20/2017)
-
-## Commenting functionality (v0.10.37, 12/20/2017)
-
-## Default sorting by ‘Last Updated Date’ (v0.10.37, 12/20/2017)
-
-## Change Workflow tasks state in bulk (v0.10.36, 12/12/2017)
-
-## Import from Google Sheets (v0.10.36, 12/12/2017)
-
-## Linking assessments with other issue tracking systems (v0.10.36, 12/12/2017)
-
-## Performance improvements
-
-### Disable scope objects in the old interface (v2.25.0, 02/24/2020)
-
+## Version 2.25.0 *(Feb 24, 2020)*
+### **Disable scope objects in the old interface**
 From now, you cannot create, update, delete and deprecate scope objects in the old interface. You can do it only in the new interface. But you still can view the scope objects in the old interface. The scope objects include: System, Product, Process, Market, Data Asset, Facility, Org Group, Metric, Technology Environment, Product Group, Projects, Vendors, Access Groups, Key Report, Account Balance.
 
-### An access to the maintenance schedules from the UI (v2.24.0, 01/10/2020)
+
+## Version 2.24.0 *(Jan 10, 2020)*
+### **An access to the maintenance schedules from the UI**
 
 From now, you can access the maintenance schedules right from the UI.
 
-### Bulk verify assessments (v2.23.0, 12/16/2019)
+
+## Version 2.23.0 *(Dec 16, 2019)*
+### **Bulk verify assessments**
 
 Now, to save your time, you can bulk verify assessments.
 
-### A New Assessment type for the SOX 302 Certification is now available in GGRC (v2.22.0, 12/2/2019)
+
+## Version 2.22.0 *(Dec 2, 2019)*
+### **A New Assessment type for the SOX 302 Certification is now available in GGRC**
 
 Now it is possible to create Assessments specific for the SOX 302 Controls Certification. You  can generate such Assessments via an Assessment Template with the checked “Enable SOX 302 assessment workflow” checkbox. When the checkbox is checked, a user is requested to specify:
 - Questions for Assessments 
@@ -147,93 +27,110 @@ The Assessments created via such Template have a special workflow:
 1. If there are no negative answers the verification step is skipped.
 2. An Assessment Assignee has permissions to provide answers to Assessment Questions, attach evidence files / URLs, add comments to an Assessment and ‘Complete’ it. Once the Assessment is completed, the Assignee can make no changes to it.
 
-### Additional description for an evidence (v2.21.0, 12/2/2019)
+
+## Version 2.21.0 *(Dec 2, 2019)*
+### **Additional description for an evidence**
 
 From now, you can add an optional additional description to an evidence file or evidence URL.
 
-### Ability to create a new Cycle Task Group during active Cycle (v2.20.0, 10/29/2019)
+
+## Version 2.20.0 *(Oct 29, 2019)*
+### **Ability to create a new Cycle Task Group during active Cycle**
 
 For ‘Repeat Off’ Workflows added a possibility to create/delete a new Cycle Task Group during an active Cycle. The option is available for Workflow Admins.
 
-### Administration of Global Custom Attributes for Controls and Risks is moved to the new frontend (v2.17.0, 10/1/2019)
+## Version 2.17.0 *(Oct 1, 2019)*
+### **Administration of Global Custom Attributes for Controls and Risks is moved to the new frontend**
 
 From now, you can create/edit Global Custom Attributes for Controls and Risks only in the new frontend. But newly created Global Custom Attributes for Controls and Risks and their values are still displayed in the old frontend.
 
-### Create a single Assessment with custom attributes from an Assessment Template (v2.10.0, 07/31/2019)
+## Version 2.10.0 *(Jul 31, 2019)*
+### **Create a single Assessment with custom attributes from an Assessment Template**
 
 Added a possibility to use local custom attributes from an Assessment Template while creating a single Assessment. In the ‘New Assessment’ dialog box, select an Assessment Template and see a list of attributes that will be added to a new Assessment.
 
-### Ability to save searches (v2.9.0, 07/23/2019)
+## Version 2.9.0 *(Jan 23, 2019)*
+### Ability to save searches
 
 Now you can save search criteria in the Global Search and Advanced Search dialog boxes. It allows you to avoid manually setting the same search criteria again every time when you need to perform a search.
 
-### New rules for Ticket Tracker integration for Assessments (v2.8.0, 07/16/2019)
+## Version 2.8.0 *(Jan 16, 2019)*
+### New rules for Ticket Tracker integration for Assessments
 
 Earlier a user could trigger a new ticket autogeneration for Assessments in completed statuses. It could confuse users who had already completed an Assessment because they received a notification from the Ticket Tracker system that they should complete the same Assessment again. From now, autogeneration of tickets for Assessments that are in the 'In Review', 'Completed (no verification)', 'Completed and Verified' and 'Deprecated' statuses is restricted.
 
-### Custom Attributes of the Person type are no longer available  (v2.8.0, 07/16/2019)
+### Custom Attributes of the Person type are no longer available
 
 Creating Custom Attributes of the Person type will not be available in the system anymore.
 
-### Introducing ‘Propose changes’ on Programs (v2.7.0, 07/01/2019)
+## Version 2.7.0 *(Jan 01, 2019)*
+### Introducing ‘Propose changes’ on Programs
 
 You can propose changes to any Program to which you have at least read access. Just click ‘Propose Changes’ button on the Program info pane, make changes and save proposal. The system sends a notification via email to Program Managers, Program Editors and Primary Contacts. Anyone who has edit access to the Program, can apply or decline the proposal.
 
-### Possibility to revert to any version of a Program (v2.7.0, 07/01/2019)
+### Possibility to revert to any version of a Program
 
 You can find a list of all versions of a Program in the ‘Version History’ tab. You can revert to any Program version by clicking the ‘Review & Restore’ button, if you have edit access to the Program.
 
-### Past Evidence can be marked as ‘Deprecated’ (v2.7.0, 07/01/2019)
+### Past Evidence can be marked as ‘Deprecated’
 
 You can mark an Evidence from past Audits and Assessments as ‘Deprecated’ and an appropriate icon will appear on the Audit info page, Assessment info page and while reusing an Evidence file/URL from ‘Related Assessments’.
 
-### Introducing the ‘Multiselect’ attribute on Assessment templates (v2.7.0, 07/01/2019)
+### Introducing the ‘Multiselect’ attribute on Assessment templates
 
 Now you can add the ‘Multiselect’ attribute to an Assessment template. This attribute allows selecting several options from a list.
 
-### Introducing new Risk Library frontend (v.2.6.0, 06/18/2019)
+## Version 2.6.0 *(Jun 18, 2019)*
+### Introducing new Risk Library frontend
 
 New frontend supports creating, editing, deleting, changing proposals, restoring versions, comments and import of Risks. The above listed functionality is disabled in the current UI. New frontend also supports mapping of Scoping objects, Controls, Standards and Regulations to Risks. The current frontend still provides an ability to add reference URLs, attachments, snapshot creation, object mapping (except to Standards, Regulations, Controls and Scoping objects).
 
-### Integration with Drogon enabled for SOX systems (v.2.5.0, 05/22/2019)
+## Version 2.5.0 *(May 22, 2019)*
+### Integration with Drogon enabled for SOX systems
 
 Integration with Drogon was enabled for read-only SOX systems. The frequency of data sync is once per day. Any updates will have to be executed Drogon as it is the source system.
 
-### Mapping Scope Object to Standard or Regulation moved to new frontend (v.2.5.0, 05/22/2019)
+### Mapping Scope Object to Standard or Regulation moved to new frontend
 
 Mapping and unmapping of Scope Object to Standard or Regulation was moved to a new frontend. To perform the mapping (or unmapping) follow the corresponding link to a new frontend.
 
-### Introducing Program to Program mapping (Mega Program) (v.2.3.0, 05/03/2019)
+## Version 2.3.0 *(Jan 03, 2019)*
+### Introducing Program to Program mapping (Mega Program)
 
 Program to Program mapping was enabled. Through Unified mapper Programs can be selected to become a Parent or a Child. Objects listed below will be automapped from a Child Program to a Parent Program.
 
 Object types available for automapping: Regulation, Objective, Control, Contract, Policy, Risk, Standard, Thread, Requirement, System, Product, Process, Market, Data Asset, Facility, Org Group, Metric, Technology Environment, Product Group, Projects, Vendors, Access Groups, Key Report, Account Balance.
 
-### A functionality to turn off sync of people fields between Assessment and Ticket tracker (v.2.3.0, 05/03/2019)
+### A functionality to turn off sync of people fields between Assessment and Ticket tracker
 
 Configurable setting is available on Audit info pane to sync the people fields between Assessment and Ticket Tracker.
 
-### Mentioning person enabled at comments (v.2.2.0, 04/24/2019)
+## Version 2.2.0 *(Apr 24, 2019)*
+### Mentioning person enabled at comments
 
 Comments functionality was enhanced by introducing mention a person feature. To leverage this feature use + or @ with a user email (example, +example@google.com or @example@google.com) in the comments box. A mentioned user will get an email notification when the comment is saved.
 
-### New object Account Balance (v.2.1.0, 04/10/2019)
+## Version 2.1.0 *(Apr 10, 2019)*
+### New object Account Balance
 
 Account Balance can be used to sort, store and summarize a company's transactions and processes. Account Balance is categorized as a scoping object and can be mapped to other GRC objects similar to other Scoping Objects.
 
-### Introducing new Control Library frontend (v.2.0.0, 03/26/2019)
+## Version 2.0.0 *(Mar 26, 2019)*
+### Introducing new Control Library frontend
 
 New frontend will support create, edit, delete, change proposal, restoring versions, comments and import of Controls. The above listed functionality will be disabled in the current UI. New frontend will also support mapping of Scoping objects, Standards and Regulations to Controls. The current frontend will still provide ability to add reference urls, attachments, snapshot creation, object mapping (except to Standards, Regulations and Scoping objects).
 
-### ‘Related Requirements’ added to snapshot (v.2.0.0, 03/26/2019)
+### ‘Related Requirements’ added to snapshot
 
 ‘Related Requirements’ section was added to ‘More information’ option on Assessment Snapshots. Related Requirements contains information about Title, Description, Notes, Custom Attributes.
 
-### Introduced new object ‘Key report’ (v.1.41.0, 02/19/2019)
+## Version 1.41.0 *(Feb 19, 2019)*
+### Introduced new object ‘Key report’
 
 New scoping object ‘Key report’ was introduced.
 
-### Changes at synchronization logic with Ticket Tracker (v.1.39.0, 02/05/2019)
+## Version 1.39.0 *(Feb 05, 2019)*
+### Changes at synchronization logic with Ticket Tracker
 
 When the ticket for Assessment is created the fields are synced with the following logic:
 
@@ -242,52 +139,62 @@ When the ticket for Assessment is created the fields are synced with the followi
 - Audit Captain appear in alphabetical order on Ticket Reporter field as primary reporter.
 - Non primary reporter Audit Captains appear on Ticket CC list.
 
-### Calendar events added for tasks (v.1.38.0, 01/16/2019)
+## Version 1.38.0 *(Jan 16, 2019)*
+### Calendar events added for tasks
 
 GGRC Workflow Tasks are now integrated with Google Calendar. In order to improve the notification capability of the tool we introduce a Google Calendar integration feature. It provides an ability to track upcoming tasks based on their due dates as google calendar events. Google calendar events are created for all tasks that are due in future and not finished. User will have ability to have an associated calendar event for every workcycle cycle task. The calendar event associated with the task contains the description of task due on that day as well as the “My Task” link.   
 
-### Added a checkbox in Audit ‘Create screen’ to map snapshots manually (v.1.38.0, 01/16/2019)
+### Added a checkbox in Audit ‘Create screen’ to map snapshots manually
 
 Now it is possible to create an audit without snapshots mapped. For this purpose on ‘Audit Create screen’ should be used a checkbox ‘Manually map snapshots’. This option is available and visible only on Audit ‘Create screen’.
 
-### Primary and Secondary Contacts in Control object are renamed (v.1.35.0, 12/20/2018)
+## Version 1.35.0 *(Dec 20, 2018)*
+### Primary and Secondary Contacts in Control object are renamed
 
 Primary and Secondary Contacts in Control object are renamed. The new labels for these roles are Control Operator and Control Owner respectively.
 
-### You can now import ticket tracker integration settings for assessments and issues (v1.32.0, 11/28/2018)
+## Version 1.32.0 *(Nov 28, 2018)*
+### You can now import ticket tracker integration settings for assessments and issues
 
 New columns in import files are now supported for bulk import of ticket tracker integration settings. The columns are Integration enabled (true, false), Hotlist ID, Component ID, Priority, Severity, Ticket title. You can either generate a new ticket for Assessment/Issue or turn on/off integration for already linked tickets. Linking existing tickets to Assessments/Issues is not supported yet. You can also export ticket tracker config for assessments and issues.
 
-### New roles for scoping objects (v1.29.0, 10/30/2018)
+## Version 1.29.0 *(Oct 30, 2018)*
+### New roles for scoping objects
 
 All scoping objects (like product, systems, entities etc.) will have the following people roles associated with them. Multiple people can be added within each role.
 
 - Vice Presidents;
 - Line of Defense One Contacts.
 
-### Link existing tickets to track assessments and issues (v1.28.0, 10/24/2018)
+## Version 1.28.0 *(Oct 24, 2018)*
+### Link existing tickets to track assessments and issues
 
 You can link assessments and issues with existing tickets by going to the edit view. In this view you can specify the ticket id (if left blank a new ticket will be generated). You can also specify ticket attributes like Hotlist ID, Component ID, ticket priority, ticket severity, ticket title.
 
-### Changes to the mapping flow from scope to directives (v1.25.0, 10/04/2018)
+## Version 1.25.0 *(Oct 04, 2018)*
+### Changes to the mapping flow from scope to directives
 
 There are some changes, please contact your administrator for more information.
 
-### Enhanced object review flow (v1.24.0, 09/26/2018)
+## Version 1.24.0 *(Sep 26, 2018)*
+### Enhanced object review flow
 
 Once reviewer can be assigned for any object like control. The system will inform them through email, that their review has been requested. User with edit rights to object will also be able to mark it reviewed. When an object is modified (i.e. new mappings or attribute edits), the system will revert its state to ‘Unreviewed’ and inform admins, primary contacts and secondary contacts about this through email.
 
-### Linking assessments with other issue tracking systems in bulk (v1.23.0, 09/18/2018)
+## Version 1.23.0 *(Sep 18, 2018)*
+### Linking assessments with other issue tracking systems in bulk
 
 You can link all existing assessments in scope of a particular audit with other issue tracking/ticketing systems in bulk, to receive notifications about their updates. You need to click ‘Generate’ button on audit info pane, and the system will auto-generate tickets using a background job for all audit’s assessments, which are not linked to tickets yet. The system will send an email once this process is complete or if there are errors.
 
-### Roles reorganization for scoping objects (v1.22.0, 09/18/2018)
+## Version 1.22.0 *(Oct 18, 2018)*
+### Roles reorganization for scoping objects
 
 In addition to all the new roles added last release, there will be two new roles for scoping objects: ‘Assignee’ and ‘Verifier’. These fields will be mandatory and accept only one person and will be used for integration with ticket tracking system.
 
 People from ‘Primary Contacts’ and ‘Secondary Contacts’ fields will be migrated into a new role ‘Compliance Contacts’.
 
-### New roles for scoping objects (v1.19.0, 08/23/2018)
+## Version 1.19.0 *(Aug 23, 2018)*
+### New roles for scoping objects
 
 All scoping objects (like product, systems, entities etc.) will have the following people roles associated with them. Multiple people can be added within each role.
 
@@ -297,93 +204,108 @@ All scoping objects (like product, systems, entities etc.) will have the followi
 - Legal Counsels;
 - System Owners.
 
-### Due Date for Issue object (v1.18.0, 08/14/2018)
+## Version 1.18.0 *(Aug 14, 2018)*
+### Due Date for Issue object
 
 New date attribute now is available for issue object. You can use it to track remediation timelines for issues.
 
-### Requirement object type (v1.17.0, 08/07/2018)
+## Version 1.17.0 *(Aug 07, 2018)*
+### Requirement object type
 
 The requirement object needs to be used to track individual requirements from directives (i.e. regulations, standards). All data from what used to be called as sections before have been transferred into requirements. For more information on how requirements need to be used see (go/grc-model).
 
-### Linking issue object with other issue tracking systems (v1.16.0, 07/31/2018)
+## Version 1.16.0 *(Jul 31, 2018)*
+### Linking issue object with other issue tracking systems
 
 You can link an issue object with other issue tracking/ticketing systems, to receive notifications about its updates. When you switch the integration on, the system will auto-generate a ticket for the issue. The system will assign the tracking ticket to a primary contact. When the integration is turned on, updates to assignments and states are allowed only through ticket tracking system. You can turn it off at any time.
 
-### New scoping objects (v1.15.0, 07/12/2018)
+## Version 1.15.0 *(Jul 12, 2018)*
+### New scoping objects
 
 New object types are now available to track scope: Product Group, Technology Environment, Metric.
 
-### Document object (v1.13.0, 06/19/2018)
+## Version 1.13.0 *(Jun 19, 2018)*
+### Document object
 
 The system will now track each attachment file/ reference URL as a separate document object type which is searchable. Document objects can be reused and mapped across different object types - controls, objectives, regulations, etc.
 
-### Disable some automatic mapping rules (v1.12.0, 06/13/2018)
+## Version 1.12.0 *(Jun 13, 2018)*
+### Disable some automatic mapping rules
 
 To prevent unnecessary automated mappings, the system won’t create automatic mappings that bring Objectives mapped to a Requirement or to regulations/standards and program. Same applies to controls.
 
-### Evidences for Assessments and Audits (v1.11.0, 05/30/2018)
+## Version 1.11.0 *(May 05, 2018)*
+### Evidences for Assessments and Audits
 
 The system will now track each evidence file/ URL as a separate object type which is searchable. For audits, the system will ensure evidence integrity for making a separate Audit specific copy. The object containing the file metadata will be archived along with the audit.
 
-### Offline mode for Import and export (v1.9.0, 04/25/2018)
+## Version 1.9.0 *(Apr 25, 2018)*
+### Offline mode for Import and export
 
 Now you won’t be stuck waiting on import and export pages. You can go offline after submitting an import. The system will send you a notification via email, once the import or export is completed successfully or some errors occur.
 
-### Re-use assessment templates across different Audits (v1.6.0, 03/15/2018)
+## Version 1.6.0 *(Mar 15, 2018)*
+### Re-use assessment templates across different Audits
 
 To re-use an assessment template from another audit, you need to click ‘Create assessment template’ button, select the required assessment template from the list and click ‘Clone’ button. The system will clone it and add the new assessment template to your audit.
 
-### No more automatic mappings from Objective-Objective and Control-Control relationships (v1.6.0, 03/15/2018)
+### No more automatic mappings from Objective-Objective and Control-Control relationships
 
 The system won’t create any automappings if you map a control to a control, or an objective to an objective.
 
-### Auto-copying of assessment procedure (v1.4.0, 02/22/2018)
+## Version 1.4.0 *(Feb 22, 2018)*
+### Auto-copying of assessment procedure
 
 To turn on copying of assessment procedure from mapped snapshots to the assessment, you need to check ‘Copy Assessment Procedure from mapped object’ while creating or editing the assessment. The system will copy and paste text, when a snapshot is mapped to an assessment.
 
-### Task secondary assignees (v1.3.0, 02/12/2018)
+## Version 1.3.0 *(Feb 12, 2018)*
+### Task secondary assignees
 
 Now you can assign secondary assignee(s) for tasks. They will work in the same way as primary assignees, except that secondary assignees are optional.
 
-### Improvements to RBAC model (v1.3.0, 02/12/2018)
+### Improvements to RBAC model
 
 An improved model was launched on backend to handle roles, that are set up on object level. Now you can add multiple people to any of the following roles or to any new custom roles - program managers, program editors, program readers; workflow managers, workflow members, audit captains, auditors. You can now add users to roles directly from info pane to reduce clicks.
 
-### Piper / Git style lite weight versioning on objects like Controls & Risks (v1.2.0, 01/24/2018)
+## Version 1.2.0 *(Jan 24, 2018)*
+### Piper / Git style lite weight versioning on objects like Controls & Risks
 
 You can propose changes for any control or risk, that you have at least read access to. Just click ‘Propose Changes’ button on object info pane, make changes and save proposal. The system will send a notification via email to object’s admins and primary contacts. Anyone who has edit access to the control or risk, can apply or decline the proposal.
 
-### Versioning functionality for Controls & Risks with ability to roll back to any previous version (v1.2.0, 01/24/2018)
+### Versioning functionality for Controls & Risks with ability to roll back to any previous version
 
 You can find a list of all versions of an object in ‘Version History’ tab. You can revert an object to any version by clicking ‘Review & Restore’ button, if you have edit access to the object.
 
-### Reverting assessments to ‘In Progress’ state (v1.0.0, 01/04/2018)
+## Version 1.0.0 *(Jan 04, 2018)*
+### Reverting assessments to ‘In Progress’ state
 
 The system will move assessment(s) automatically from ‘Not Started’ to ‘In Progress’ state, if you change any data in grey section or add a comment.
 
 The system will revert assessment(s) automatically from ‘In Review’ or ‘Completed’ to ‘In Progress’ state, if you change any info about assessment, except people, comments, labels and mapped objects.
 
-### Labeling assessments (v1.0.0, 01/04/2018)
+### Labeling assessments
 
 You can use labels, to easily categorize and search for assessments. You can add labels to an assessment from ‘Add Assessment’, ‘Edit Assessment’ pop-ups, assessment page or import.
 
-### Improvements to surfacing ‘related assessments’ (v0.10.37, 12/20/2017)
+## Version 0.10.37 *(Dec 20, 2017)*
+### Improvements to surfacing ‘related assessments’
 
 The system will consider assessments as related between each other, if they are mapped to the same assessed objects or other mapped versions of it. For example two assessments mapped to control A (or any versions of it) will be considered related. If an assessment is mapped to control B it will be also considered related if control A and B are related.
 
-### Extend assessment assignees rights (v0.10.37, 12/20/2017)
+### Extend assessment assignees rights
 
 As an assessment assignee, you can now see all regulations and objectives mapped to a control, if such control is mapped to your assessment.
 
-### Commenting functionality (v0.10.37, 12/20/2017)
+### Commenting functionality
 
 You can leave comments practically to any objects except workflow related ones. The system will send a notification via email to object’s admins, primary and secondary contacts, if a new comment is added to their object. To turn off such notifications, please uncheck notify checkbox before adding a comment.
 
-### Default sorting by ‘Last Updated Date’ (v0.10.37, 12/20/2017)
+### Default sorting by ‘Last Updated Date’
 
 The system will sort all objects lists except tasks by last updated date by default, so you can easily find objects that you recently worked with. Tasks will still have default sorting by due date.
 
-### Change Workflow tasks state in bulk (v0.10.36, 12/12/2017)
+## Version 0.10.36 *(Dec 12, 2017)*
+### Change Workflow tasks state in bulk
 
 You can update states of the tasks assigned to you in bulk. Please, follow the steps below:
 
@@ -393,15 +315,15 @@ You can update states of the tasks assigned to you in bulk. Please, follow the s
 4. Choose a state from dropdown.
 5. Click ‘Update’ button.
 
-### Import from Google Sheets (v0.10.36, 12/12/2017)
+### Import from Google Sheets
 
 You can import data either from csv file or Google Sheet!
 
-### Linking assessments with other issue tracking systems (v0.10.36, 12/12/2017)
+### Linking assessments with other issue tracking systems
 
 You can link an assessment with other issue tracking/ticketing systems, to receive notifications about its updates. You need to switch on the ticket tracker integration on audit level, and the system will auto-generate a ticket tracking system's ticket for each newly created assessment in scope of this audit. The system will assign such ticket tracking system's ticket to an assessment assignee and updates it each time the assessment state is changed or a new comment is added. You can turn the synchronization off on assessment level or on audit level for all assessments in scope of this audit, if it isn’t required any more.
 
-### Performance improvements
+## Performance improvements
 
 The performance has been improved in the following places in application:
 

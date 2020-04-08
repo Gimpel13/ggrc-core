@@ -52,7 +52,7 @@
 < README.md
 < reviews/README
 < setup.cfg
-< src/ggrc-client/js/components/release-notes-list/release-notes.md
+< src/ggrc-client/js/components/release-notes-modal/release-notes.md
 < src/ggrc/migrations/versions/ggrcdev.sql
 < src/ggrc/templates/maintenance/maintenance.html
 < src/ggrc/templates/maintenance_mode/maintenance.html

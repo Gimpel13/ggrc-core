@@ -134,7 +134,9 @@ module.exports = function (env) {
         GOOGLE_ANALYTICS_ID: JSON.stringify(ENV.GOOGLE_ANALYTICS_ID),
         BUILD_DATE: JSON.stringify(new Date()),
         RELEASE_NOTES_DATE: JSON.stringify(
-          getReleaseNotesDate(`${contextDir}/js/components/release-notes-list/release-notes.md`)
+          getReleaseNotesDate(
+            `${contextDir}/js/components/release-notes-modal/release-notes.md`
+          )
         ),
       }),
       new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
