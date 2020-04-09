@@ -75,7 +75,7 @@ describe('tree-item-attr component', () => {
 
       let result = viewModel.getDefaultValue();
       expect(viewModel.instance.attr).toHaveBeenCalledWith('notes');
-      expect(result).toEqual('Example \n Notes');
+      expect(result).toEqual('<p><strong>Example</strong></p><p>Notes</p>');
     });
 
     describe('if isMarkdown is true', () => {
@@ -91,7 +91,7 @@ describe('tree-item-attr component', () => {
 
           expect(MarkdownUtils.convertMarkdownToHtml)
             .toHaveBeenCalledWith('some markdown notes');
-          expect(result).toEqual('Example for markdown');
+          expect(result).toEqual('<strong>Example for markdown</strong>');
         });
     });
   });

@@ -13,7 +13,6 @@ import {
 } from '../../plugins/utils/user-utils';
 import template from './templates/tree-item-attr.stache';
 import {convertMarkdownToHtml} from '../../plugins/utils/markdown-utils';
-import {getOnlyAnchorTags} from '../../plugins/ggrc-utils';
 
 // attribute names considered "default" and representing a date
 const DATE_ATTRS = new Set([
@@ -79,18 +78,16 @@ const ViewModel = canDefineMap.extend({
     },
   },
   /**
-   * Transforms Rich text attribute value.
+   * Returns value in HTML format.
    *
    * @param {String} value - Rich text attribute value from DB.
-   * @return {String} - the transformed rich text attribute value.
+   * @return {String} - the HTML.
    */
   getConvertedRichTextAttr(value) {
-    let result = value;
-
     if (this.isMarkdown()) {
-      result = convertMarkdownToHtml(result);
+      return convertMarkdownToHtml(value);
     }
-    return getOnlyAnchorTags(result);
+    return value;
   },
   /**
    * Retrieve the string value of an attribute.
