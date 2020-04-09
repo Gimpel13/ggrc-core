@@ -1025,7 +1025,7 @@ describe('assessment-info-pane component', () => {
 
     describe('if deferredSave was rejected', () => {
       beforeEach(function () {
-        dfd.reject(assessment);
+        dfd.reject(assessment, {});
         spyOn(NotifiersUtils, 'notifierXHR');
       });
 
@@ -1042,7 +1042,6 @@ describe('assessment-info-pane component', () => {
         });
 
       it('calls removeItems with appropriate params', (done) => {
-        dfd.reject(assessment);
         vm.addRelatedItem(event, type);
         dfd.fail(() => {
           expect(vm.removeItems.calls.count()).toBe(1);
@@ -1160,7 +1159,7 @@ describe('assessment-info-pane component', () => {
 
     describe('if deferredSave was resolved', () => {
       beforeEach(function () {
-        dfd.resolve(assessment);
+        dfd.resolve(assessment, {});
       });
 
       it('sets "isUpdating{<passed capitalized type>}" ' +
@@ -1190,7 +1189,7 @@ describe('assessment-info-pane component', () => {
 
     describe('if deferredSave was rejected ', () => {
       beforeEach(function () {
-        dfd.reject(assessment);
+        dfd.reject(assessment, {});
       });
 
       it('shows error', function (done) {
@@ -1828,7 +1827,9 @@ describe('assessment-info-pane component', () => {
     });
 
     it('adds deferred transaction', function () {
-      const push = jasmine.createSpy('push');
+      const push = jasmine.createSpy('push').and.returnValue({
+        'catch': jasmine.createSpy(),
+      });
       vm.attr('deferredSave', {push});
       vm.saveGlobalAttributes(event);
       expect(push).toHaveBeenCalledWith(jasmine.any(Function));
@@ -1839,7 +1840,9 @@ describe('assessment-info-pane component', () => {
       let customAttr;
 
       beforeEach(function () {
-        const push = jasmine.createSpy('push');
+        const push = jasmine.createSpy('push').and.returnValue({
+          'catch': jasmine.createSpy(),
+        });
         customAttr = jasmine.createSpy('customAttr');
         vm.attr('instance', {customAttr});
         vm.attr('deferredSave', {push});
@@ -2196,7 +2199,9 @@ describe('assessment-info-pane component', () => {
     beforeEach(() => {
       method = vm.saveGlobalAttributes.bind(vm);
       vm.attr('deferredSave', {
-        push: jasmine.createSpy(),
+        push: jasmine.createSpy().and.returnValue({
+          'catch': jasmine.createSpy(),
+        }),
       });
       vm.attr('instance', {
         customAttr: jasmine.createSpy(),

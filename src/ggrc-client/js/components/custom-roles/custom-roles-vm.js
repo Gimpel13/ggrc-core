@@ -6,6 +6,7 @@
 import canMap from 'can-map';
 import {isChangeableExternally} from '../../plugins/utils/ggrcq-utils';
 import {isSnapshot} from '../../plugins/utils/snapshot-utils';
+import {notifierXHR} from '../../plugins/utils/notifiers-utils';
 
 export default canMap.extend({
   define: {
@@ -53,7 +54,15 @@ export default canMap.extend({
     return this.attr('instance').save()
       .then(() => {
         this.filterACL();
-      }).always(() => {
+      })
+      .catch((instance, xhr) => {
+        if (xhr.status === 409) {
+          notifierXHR('warning', xhr);
+          return;
+        }
+        notifierXHR('error', xhr);
+      })
+      .always(() => {
         this.attr('updatableGroupId', null);
       });
   },

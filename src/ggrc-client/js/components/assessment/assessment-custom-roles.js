@@ -10,6 +10,7 @@ import '../related-objects/related-people-access-control-group';
 import '../people/editable-people-group';
 import template from './templates/assessment-custom-roles.stache';
 import viewModel from '../custom-roles/custom-roles-vm';
+import {notifierXHR} from '../../plugins/utils/notifiers-utils';
 
 export default canComponent.extend({
   tag: 'assessment-custom-roles',
@@ -25,7 +26,15 @@ export default canComponent.extend({
       })
         .then(() => {
           this.filterACL();
-        }).always(() => {
+        })
+        .catch((instance, xhr) => {
+          if (xhr.status === 409) {
+            notifierXHR('warning', xhr);
+            return;
+          }
+          notifierXHR('error', xhr);
+        })
+        .always(() => {
           this.attr('updatableGroupId', null);
         });
     },

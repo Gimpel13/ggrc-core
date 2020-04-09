@@ -17,6 +17,7 @@ import tracker from '../../tracker';
 import {isAllowedFor} from '../../permission';
 import {getPageInstance} from '../../plugins/utils/current-page-utils';
 import {getPlainText} from '../../plugins/ggrc-utils';
+import {notifierXHR} from '../../plugins/utils/notifiers-utils';
 
 export default canComponent.extend({
   tag: 'assessment-local-ca',
@@ -190,6 +191,13 @@ export default canComponent.extend({
 
         self.attr('saving', true);
       })
+        .catch((instance, xhr) => {
+          if (xhr.status === 409) {
+            notifierXHR('warning', xhr);
+            return;
+          }
+          notifierXHR('error', xhr);
+        })
         .always(() => {
           this.attr('saving', false);
           this.attr('isDirty', false);

@@ -84,6 +84,10 @@ export default canComponent.extend({
           if (isConnectionLost()) {
             connectionLostNotifier();
           } else {
+            if (xhr.status === 409) {
+              notifierXHR('warning', xhr);
+              return;
+            }
             notifierXHR('error', xhr);
           }
         })

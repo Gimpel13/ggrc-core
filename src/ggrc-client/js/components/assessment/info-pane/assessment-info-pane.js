@@ -425,7 +425,11 @@ export default canComponent.extend({
           }
         })
         .fail(function (instance, xhr) {
-          notifierXHR('error', xhr);
+          if (xhr.status === 409) {
+            notifierXHR('warning', xhr);
+          } else {
+            notifierXHR('error', xhr);
+          }
 
           if (type === 'comments') {
             tracker.stop(assessment.type,
@@ -469,8 +473,12 @@ export default canComponent.extend({
       this.attr('deferredSave').push(function () {
         self.addAction('remove_related', related);
       })
-        .fail(function () {
-          notifier('error', 'Unable to remove URL.');
+        .fail((instance, xhr) => {
+          if (xhr.status === 409) {
+            notifierXHR('warning', xhr);
+          } else {
+            notifier('error', 'Unable to remove URL.');
+          }
           items.splice(index, 0, item);
         })
         .always(function (assessment) {
@@ -600,14 +608,14 @@ export default canComponent.extend({
     },
     initializeDeferredSave: function () {
       this.attr('deferredSave', new DeferredTransaction(
-        function (resolve, reject) {
-          this.attr('instance').save().done(resolve).fail(() => {
+        (resolve, reject) => {
+          this.attr('instance').save().done(resolve).fail((instance, xhr) => {
             if (isConnectionLost()) {
               connectionLostNotifier();
             }
-            reject();
+            reject(instance, xhr);
           });
-        }.bind(this), 1000));
+        }, 1000));
     },
     refreshAssessment() {
       this.attr('instance').refresh().then((response) => {
@@ -681,6 +689,7 @@ export default canComponent.extend({
       }).fail((object, xhr) => {
         if (xhr && xhr.status === 409 && xhr.remoteObject) {
           instance.attr('status', xhr.remoteObject.status);
+          notifierXHR('warning', xhr);
         } else {
           this.afterStatusSave(status);
           this.attr('previousStatus', previousStatus);
@@ -698,7 +707,14 @@ export default canComponent.extend({
         globalAttributes.each((value, caId) => {
           instance.customAttr(caId, value);
         });
-      });
+      })
+        .catch((instance, xhr) => {
+          if (xhr.status === 409) {
+            notifierXHR('warning', xhr);
+            return;
+          }
+          notifierXHR('error', xhr);
+        });
     },
     showRequiredInfoModal: function (e, field) {
       let scope = field || e.field;
