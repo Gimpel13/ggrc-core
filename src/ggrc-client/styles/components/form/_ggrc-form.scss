@@ -75,8 +75,11 @@
   }
 
   .ggrc-form-item {
-    margin-bottom: 20px;
     display: flex;
+
+    &:not(:last-child) {
+      margin-bottom: 20px;
+    }
 
     &.hidden {
       display: none;
