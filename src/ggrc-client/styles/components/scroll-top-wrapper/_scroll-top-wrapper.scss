@@ -1,0 +1,48 @@
+/*
+ * Copyright (C) 2020 Google Inc.
+ * Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
+ */
+
+ scroll-top-wrapper {
+  position: relative;
+
+  .scroll-top-wrapper {
+    height: 100%;
+    overflow: scroll; 
+
+    &__button {
+      position: absolute;
+      bottom: 25px;
+      left: calc(50% - 42px);
+      margin: 0;
+      border-radius: 15px;
+      border-style: solid;
+      line-height: 22px;
+      transform: translateY(0px);
+      transition: transform 0.2s 0.1s, opacity 0.2s 0.1s;
+      opacity: 1;
+      outline: none;
+      color: $white;
+      background-color: $status-completed;
+
+      .fa-arrow-up {
+          font-size: 13px;
+      }
+    
+      &.delayed-hidden {
+          display: block;
+          transform: translateY(30px);
+          opacity: 0;
+          pointer-events: none;
+      }
+    
+      &.instantly-hidden {
+          display: none;
+      }
+
+      &:hover {
+          background-color: lighten($status-completed, 10%);
+      }
+    }
+  }
+}
