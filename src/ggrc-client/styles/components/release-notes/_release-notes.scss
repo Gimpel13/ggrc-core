@@ -4,7 +4,7 @@
  */
 
 .release-notes {
-  position: relative;
+  max-width: 860px;
 
   .simple-modal__header-text {
     font-size: 24px;
@@ -12,25 +12,77 @@
   }
 
   &__body {
-    display: block;
-    overflow: scroll;
+    display: flex;
     max-height: calc(100% - 54px - 45px);
     font-size: 13px;
     color: transparentize($black, 0.13);
 
-    p {
-      margin: 13px 0;
+    em {
+      color: $gray;
+      font-style: normal;
+      font-size: 0.8em;
+    }
 
-      &:first-child {
-        margin-bottom: 32px;
+    p {
+      margin: 5px 0;
+      line-height: 20px;
+    }
+  }
+
+  &__version-list-names {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 180px;
+    border-right: 1px solid $itemBorder;
+    padding: 15px;
+    margin: 0;
+    overflow: scroll;
+  }
+
+  &__content {
+    padding: 15px 20px;
+    overflow: scroll;
+
+    ul, ol {
+      margin: 0 0 9px 20px;
+    }
+  }
+
+  &__version-list {
+    h2 {
+      margin-bottom: 7px;
+
+      font-size: 16px;
+      font-weight: normal;
+  
+      &:not(:first-child) {
+        margin-top: 25px;
+      }
+    }
+  
+    h3 {
+      margin-top: 7px;
+  
+      font-size: 14px;
+    }
+
+    > *:not(h2) {
+      padding-left: 17px;
+    }
+  }
+
+  &__last-version-note {
+    h3 {
+      font-size: 16px;
+
+      &:not(:first-child) {
+        margin-top: 25px;
       }
     }
 
-    h1, h2, h3, h4, h5, h6 {
-      margin: 32px 0 0 0;
-      font-size: 16px;
+    strong {
       font-weight: normal;
-      color: $black;
     }
   }
 
@@ -46,38 +98,12 @@
     padding:  0 20px;
     color: transparentize($black, 0.5);
   }
+}
 
-  .on-top-button {
-    position: absolute;
-    bottom: 70px;
-    left: calc(50% - 42px);
-    border-radius: 15px;
-    border-style: solid;
-    line-height: 22px;
-    transform: translateY(0px);
-    transition: transform 0.2s 0.1s, opacity 0.2s 0.1s;
-    opacity: 1;
-    outline: none;
-    color: $white;
-    background-color: $status-completed;
+.release-version-list-names {
+  list-style: none;
 
-    .fa-arrow-up {
-      font-size: 13px;
-    }
-
-    &.delayed-hidden {
-      display: block;
-      transform: translateY(30px);
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    &.instantly-hidden {
-      display: none;
-    }
-
-    &:hover {
-      background-color: lighten($status-completed, 10%);
-    }
+  &__element:not(:first-child) {
+    margin-top: 10px;
   }
 }

@@ -4,25 +4,75 @@
 }}
 
 <div class="simple-modal__header">
-  <div class="simple-modal__header-text">{{modalTitle}}</div>
-  <div class="release-notes__version-block">
-    <div>Version {{shortVersion}}</div>
-    <div class="release-notes__date">{{releaseNotesDate}}</div>
+  <div class="form-header-container">
+    {{#if isVersionListMode}}
+      <button
+        type="button"
+        class="btn btn-small btn-icon"
+        on:el:click="setLastVersionMode"
+      >
+        <i class="fa fa-arrow-left"></i>
+      </button>
+    {{/if}}
+    <div class="simple-modal__header-text">{{modalTitle}}</div>
   </div>
+  {{#unless isVersionListMode}}
+    <div class="release-notes__version-block">
+      <div>Version {{shortVersion}}</div>
+      <div class="release-notes__date">{{releaseNotesDate}}</div>
+    </div>
+  {{/unless}}
 
-  <button type="button" class="btn btn-small btn-icon" on:el:click="hide">
+  <button
+    type="button"
+    class="btn btn-small btn-icon"
+    on:el:click="hide"
+  >
     <i class="fa fa-times black"></i>
   </button>
 </div>
-
-<release-notes-list class="simple-modal__body release-notes__body"></release-notes-list>
+  <div class="release-notes__body">
+    {{#if isVersionListMode}}
+      <scroll-link-wrapper class="wrapper">
+        <ul class="release-version-list-names release-notes__version-list-names">
+          {{#each versionList}}
+            <li class="release-version-list-names__element"><a href="#{{id}}">{{version}}</a><em>{{versionDate}}</em></li>
+          {{/each}}
+        </ul>
+        <scroll-top-wrapper>
+          <div class="release-notes__content release-notes__version-list">
+            {{{notesTemplate}}}
+          </div>
+        </scroll-top-wrapper>
+      </scroll-link-wrapper>
+    {{#else}}
+      <scroll-top-wrapper>
+        <div class="release-notes__content release-notes__last-version-note">
+          {{{lastVersionNote}}}
+        </div>
+      </scroll-top-wrapper>
+    {{/if}}
+  </div>
 
 <div>
   <div class="simple-modal__footer">
     <div class="simple-modal__toolbar">
-      <button type="button"
-              class="btn btn-small btn-white simple-modal__toolbar-item"
-              on:el:click="hide">Close</button>
+      <button
+        type="button"
+        class="btn btn-small btn-white simple-modal__toolbar-item"
+        on:el:click="hide"
+      >
+        Cancel
+      </button>
+      {{#unless isVersionListMode}}
+        <button 
+          type="button"
+          class="btn btn-small btn-white simple-modal__toolbar-item"
+          on:el:click="setVersionListMode"
+        >
+          Version History
+        </button>
+      {{/unless}}
     </div>
   </div>
 </div>
