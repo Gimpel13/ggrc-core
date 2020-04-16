@@ -26,6 +26,12 @@ export default Cacheable.extend({
     modified_by: Stub,
     context: Stub,
   },
+  defaults: {
+    overdueOption: {
+      endDateFields: ['end_date'],
+      doneState: 'Finished',
+    },
+  },
   init: function () {
     if (this._super) {
       this._super(...arguments);

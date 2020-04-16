@@ -43,6 +43,10 @@ export default Cacheable.extend({
   },
   defaults: {
     title: '',
+    overdueOption: {
+      endDateFields: ['next_due_date', 'end_date'],
+      doneState: 'Finished',
+    },
   },
   tree_view_options: {
     attr_list: [{

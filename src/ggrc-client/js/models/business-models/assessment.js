@@ -17,6 +17,7 @@ import AccessControlList from '../mixins/access-control-list';
 import RefetchHash from '../mixins/refetch-hash';
 import AssessmentIssueTracker from '../mixins/assessment-issue-tracker';
 import RelatedAssessmentsLoader from '../mixins/related-assessments-loader';
+import IsOverdue from '../mixins/is-overdue';
 import {REFRESH_MAPPING, REFRESHED} from '../../events/event-types';
 
 export default Cacheable.extend({
@@ -29,12 +30,20 @@ export default Cacheable.extend({
   destroy: 'DELETE /api/assessments/{id}',
   create: 'POST /api/assessments',
   mixins: [
-    CaUpdate, AccessControlList, RefetchHash,
-    AssessmentIssueTracker, RelatedAssessmentsLoader,
+    CaUpdate,
+    AccessControlList,
+    RefetchHash,
+    AssessmentIssueTracker,
+    RelatedAssessmentsLoader,
+    IsOverdue,
   ],
   is_custom_attributable: true,
   isRoleable: true,
   defaults: {
+    overdueOption: {
+      endDateFields: ['start_date'],
+      doneState: 'Completed',
+    },
     test_plan_procedure: true,
     assessment_type: 'Control',
     status: 'Not Started',

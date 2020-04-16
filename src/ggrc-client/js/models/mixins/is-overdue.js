@@ -5,6 +5,7 @@
 
 import moment from 'moment';
 import Mixin from './mixin';
+import loFind from 'lodash/find';
 
 /**
  * Specific Model mixin to check overdue status
@@ -12,23 +13,23 @@ import Mixin from './mixin';
 export default class IsOverdue extends Mixin {
   'after:init'() {
     this.attr('isOverdue', this._isOverdue());
-    this.bind('change', function () {
-      this.attr('isOverdue', this._isOverdue());
-    }.bind(this));
+    this.bind('change', (event, fieldName) => {
+      if (this.overdueOption.attr('endDateFields').indexOf(fieldName) !== -1) {
+        this.attr('isOverdue', this._isOverdue());
+      }
+    });
   }
-
   _isOverdue() {
-    let doneState = this.attr('is_verification_needed') ?
-      'Verified' : 'Finished';
-    let endDate = moment(
-      this.attr('next_due_date') || this.attr('end_date'));
-    let today = moment().startOf('day');
-    let startOfDate = moment(endDate).startOf('day');
-    let isOverdue = endDate && today.diff(startOfDate, 'days') > 0;
+    const endDateField = loFind(this.attr('overdueOption.endDateFields'),
+      (field) => !!this.attr(field));
+    const endDate = moment(this.attr(endDateField));
+    const today = moment().startOf('day');
+    const startOfDate = moment(endDate).startOf('day');
 
-    if (this.attr('status') === doneState) {
+    if (this.attr('status') === this.attr('overdueOption.doneState')) {
       return false;
     }
-    return isOverdue;
+
+    return endDate && today.diff(startOfDate, 'days') > 0;
   }
 }

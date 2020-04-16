@@ -213,6 +213,16 @@
     {{#is(instance.key_control, true)}}Key{{/is}}
   {{/case}}
 
+  {{#case 'start_date'}}
+    {{#if_instance_of instance 'Assessment'}}
+      <span class="{{#if instance.isOverdue}}state-overdue{{/if}}">
+        {{{defaultValue}}}
+      </span>
+    {{#else}}
+      {{{defaultValue}}}
+    {{/if_instance_of}}
+  {{/case}}
+
   {{#default}}
     {{{defaultValue}}}
   {{/default}}
