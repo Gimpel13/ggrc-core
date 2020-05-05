@@ -10,6 +10,7 @@ import * as TreeViewUtils from '../../../plugins/utils/tree-view-utils';
 import * as SnapshotUtils from '../../../plugins/utils/snapshot-utils';
 import * as AdvancedSearch from '../../../plugins/utils/advanced-search-utils';
 import * as QueryAPI from '../../../plugins/utils/query-api-utils';
+import * as StateUtils from '../../../plugins/utils/state-utils';
 import Pagination from '../../base-objects/pagination';
 import {getComponentVM} from '../../../../js_specs/spec-helpers';
 import Component from '../mapper-results';
@@ -378,7 +379,6 @@ describe('mapper-results component', () => {
       spyOn(QueryAPI, 'buildParam')
         .and.returnValue({});
       spyOn(AdvancedSearch, 'buildFilter');
-      spyOn(QueryParser, 'parse');
       spyOn(QueryParser, 'joinQueries');
     });
 
@@ -471,7 +471,7 @@ describe('mapper-results component', () => {
 
     it('prepare request for unlocked items for Audits', () => {
       viewModel.type = 'Audit';
-      spyOn(viewModel, 'prepareUnlockedFilter').and.returnValue('unlocked');
+      spyOn(StateUtils, 'unlockedFilter').and.returnValue('unlocked');
       viewModel.getQuery();
 
       expect(QueryParser.joinQueries.calls.argsFor(2)[1])

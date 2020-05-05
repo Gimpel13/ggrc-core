@@ -405,10 +405,6 @@ const ViewModel = canDefineMap.extend({
       return;
     }
 
-    if (additionalFilter) {
-      additionalFilter = QueryParser.parse(additionalFilter);
-    }
-
     const filter = filters
       .filter((options) => options.query)
       .reduce(concatFilters, additionalFilter);

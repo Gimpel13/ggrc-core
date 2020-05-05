@@ -186,10 +186,16 @@ function buildStatusFilter(
 
 /**
  * Return query for unlocked objects
- * @return {String} The unlocked query
+ * @return {Object} The unlocked query
  */
 function unlockedFilter() {
-  return '"Archived"="False"';
+  return {
+    expression: {
+      left: 'archived',
+      op: {name: '='},
+      right: 'False',
+    },
+  };
 }
 
 function buildFilterExpression(statuses, modelName) {

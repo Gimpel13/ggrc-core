@@ -614,7 +614,9 @@ describe('tree-view-filter component', () => {
     it('should set "currentFilter" from additionalFilter ' +
     'when advancedSearch filter is empty', () => {
       viewModel.filters = [];
-      viewModel.additionalFilter = 'some filter';
+      viewModel.additionalFilter = {
+        expression: 'some expression',
+      };
 
       const advancedSearch = {
         filter: null,
@@ -623,31 +625,14 @@ describe('tree-view-filter component', () => {
 
       viewModel.advancedSearch = advancedSearch;
 
-      spyOn(QueryParser, 'parse').and.returnValue({
-        query: 'some additional query',
-      });
-
       method();
 
       expect(viewModel.currentFilter.filter.serialize())
         .toEqual({
-          query: 'some additional query',
+          expression: 'some expression',
         });
       expect(viewModel.currentFilter.request.serialize())
         .toEqual(advancedSearch.request);
-    });
-
-    it('should call "QueryParser.parse" when additionalFilter is NOT empty' +
-    'advanced advancedSearch filter is empty', () => {
-      viewModel.additionalFilter = 'some additional query';
-      viewModel.advancedSearch = new canMap();
-
-      spyOn(QueryParser, 'parse');
-      method();
-
-      expect(QueryParser.parse).toHaveBeenCalledWith(
-        viewModel.additionalFilter
-      );
     });
 
     it('should call "concatFilters" util when additionalFilter and "filter"' +
@@ -657,12 +642,9 @@ describe('tree-view-filter component', () => {
         query: {left: 'title', op: {name: '~'}, right: 'my title'},
       }];
 
-      viewModel.additionalFilter = 'some additional query';
+      viewModel.additionalFilter = {};
       viewModel.advancedSearch = new canMap();
 
-      spyOn(QueryParser, 'parse').and.returnValue({
-        query: 'some additional query',
-      });
       spyOn(QueryApiUtils, 'concatFilters');
 
       method();

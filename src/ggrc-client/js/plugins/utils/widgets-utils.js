@@ -33,7 +33,6 @@ import {
   getPageType,
   getPageInstance,
 } from './current-page-utils';
-import QueryParser from '../../generated/ggrc-filter-query-parser';
 import Person from '../../models/business-models/person';
 
 let widgetsCounts = new canMap({});
@@ -176,11 +175,9 @@ function _initWidgetCounts(widgets, type, id) {
       widgetObject.relation,
     );
 
-    let param = buildParam(widgetObject.name,
+    const param = buildParam(widgetObject.name,
       {}, expression, null,
-      widgetObject.additionalFilter ?
-        QueryParser.parse(widgetObject.additionalFilter) :
-        null
+      widgetObject.additionalFilter || null
     );
 
     param.type = 'count';

@@ -23,7 +23,6 @@ import {
   buildParam,
   batchRequestsWithPromise as batchRequests,
 } from '../../plugins/utils/query-api-utils';
-import QueryParser from '../../generated/ggrc-filter-query-parser';
 import Pagination from '../base-objects/pagination';
 import Person from '../../models/business-models/person';
 import {notifier} from '../../plugins/utils/notifiers-utils';
@@ -118,15 +117,31 @@ export default canComponent.extend({
       const instance = this.attr('instance');
 
       if (!this.attr('options.showLastReviewUpdates')) {
-        return QueryParser.parse(
-          `${instance.type} not_empty_revisions_for ${instance.id}`);
+        return {
+          expression: {
+            resource_type: instance.type,
+            op: {name: 'not_empty_revisions'},
+            resource_id: instance.id.toString(),
+          },
+        };
       } else {
         const reviewDate = moment(this.attr('review.last_reviewed_at'))
           .format('YYYY-MM-DD HH:mm:ss');
-
-        return QueryParser.parse(
-          `${instance.type} not_empty_revisions_for ${instance.id} AND
-          created_at >= "${reviewDate}"`);
+        return {
+          expression: {
+            left: {
+              resource_type: instance.type,
+              op: {name: 'not_empty_revisions'},
+              resource_id: instance.id.toString(),
+            },
+            op: {name: 'AND'},
+            right: {
+              left: 'created_at',
+              op: {name: '>='},
+              right: reviewDate,
+            },
+          },
+        };
       }
     },
     makeRevisionModels(data) {

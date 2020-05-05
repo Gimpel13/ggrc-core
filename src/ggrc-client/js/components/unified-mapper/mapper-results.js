@@ -245,10 +245,6 @@ const ViewModel = canDefineMap.extend({
       operation: operation || 'relevant',
     }, filter);
   },
-  prepareUnlockedFilter() {
-    let filterString = StateUtils.unlockedFilter();
-    return QueryParser.parse(filterString);
-  },
   prepareOwnedFilter() {
     let userId = GGRC.current_user.id;
     return {
@@ -308,7 +304,7 @@ const ViewModel = canDefineMap.extend({
     if (this.shouldApplyUnlockedFilter(modelName)) {
       advancedFilters = QueryParser.joinQueries(
         advancedFilters,
-        this.prepareUnlockedFilter());
+        StateUtils.unlockedFilter());
     }
 
     if (this.applyOwnedFilter) {

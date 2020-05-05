@@ -214,8 +214,13 @@ function makeRequest(params) {
 }
 
 function makeRelevantFilter(filter) {
-  let relevantFilter = QueryParser.parse('#' + filter.type + ',' +
-    filter.id + '#');
+  const relevantFilter = {
+    expression: {
+      object_name: filter.type,
+      op: {name: 'relevant'},
+      ids: [filter.id.toString()],
+    },
+  };
 
   if (filter && !filter.operation) {
     filter.operation = 'relevant';

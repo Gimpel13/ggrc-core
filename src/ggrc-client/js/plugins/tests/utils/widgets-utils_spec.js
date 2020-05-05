@@ -9,7 +9,6 @@ import * as SnapshotUtils from '../../utils/snapshot-utils';
 import * as WidgetsUtils from '../../utils/widgets-utils';
 import * as QueryAPI from '../../utils/query-api-utils';
 import * as WidgetList from '../../../modules/widget-list';
-import QueryParser from '../../../generated/ggrc-filter-query-parser';
 
 describe('GGRC Utils Widgets', function () {
   describe('getWidgetList() method', function () {
@@ -174,9 +173,6 @@ describe('GGRC Utils Widgets', function () {
         .and.callFake((objName) => ({
           objectName: objName,
         }));
-
-      spyOn(QueryParser, 'parse')
-        .and.returnValue({});
     });
 
     it('should not make request when no widget was provided', () => {

@@ -218,30 +218,46 @@ export default canComponent.extend({
             const id = isPrevious ? index - 1 : el.filter.id;
 
             if (id !== undefined) {
-              const filter = `#${el.model_name},${id}#`;
+              const filter = {
+                expression: {
+                  object_name: el.model_name,
+                  op: {name: 'relevant'},
+                  ids: [id.toString()],
+                },
+              };
 
               return filterIndex ?
-                `${result} ${el.operator} ${filter}` : filter;
+                QueryParser.joinQueries(result, filter, el.operator) : filter;
             }
             return result;
           }, '');
 
         if (panel.attr('snapshot_type')) {
+          const childTypeFilter = {
+            expression: {
+              left: 'child_type',
+              op: {name: '='},
+              right: panel.attr('snapshot_type'),
+            },
+          };
           if (relevantFilter) {
-            relevantFilter += ' AND ';
+            relevantFilter =
+              QueryParser.joinQueries(relevantFilter, childTypeFilter);
+          } else {
+            relevantFilter = childTypeFilter;
           }
-          relevantFilter += `child_type = ${panel.attr('snapshot_type')}`;
         }
+        const panelFilter = QueryParser.parse(panel.filter || '');
+        const filters = relevantFilter ?
+          QueryParser.joinQueries(relevantFilter, panelFilter) :
+          panelFilter;
 
         return {
           object_name: panel.type,
           fields: allItems
             .filter((item) => item.isSelected)
             .map((item) => item.key).serialize(),
-          filters: QueryParser.joinQueries(
-            QueryParser.parse(relevantFilter || ''),
-            QueryParser.parse(panel.filter || '')
-          ),
+          filters,
         };
       });
     },

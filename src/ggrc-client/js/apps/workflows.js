@@ -21,8 +21,20 @@ let WorkflowExtension = {};
 let historyWidgetCountsName = 'cycles:history';
 let currentWidgetCountsName = 'cycles:active';
 
-let historyWidgetFilter = 'is_current = 0';
-let currentWidgetFilter = 'is_current = 1';
+const HISTORY_WIDGET_FILTER = {
+  expression: {
+    left: 'is_current',
+    op: {name: '='},
+    right: '0',
+  },
+};
+const CURRENT_WIDGET_FILTER = {
+  expression: {
+    left: 'is_current',
+    op: {name: '='},
+    right: '1',
+  },
+};
 
 // Register `workflows` extension with GGRC
 widgetModules.push(WorkflowExtension);
@@ -33,12 +45,12 @@ let countsMap = {
   history: {
     name: 'Cycle',
     countsName: historyWidgetCountsName,
-    additionalFilter: historyWidgetFilter,
+    additionalFilter: HISTORY_WIDGET_FILTER,
   },
   activeCycles: {
     name: 'Cycle',
     countsName: currentWidgetCountsName,
-    additionalFilter: currentWidgetFilter,
+    additionalFilter: CURRENT_WIDGET_FILTER,
   },
   taskGroup: 'TaskGroup',
 };
@@ -97,7 +109,7 @@ WorkflowExtension.init_widgets_for_workflow_page = function () {
       parent_instance: object,
       model: Cycle,
       countsName: historyWidgetCountsName,
-      additional_filter: historyWidgetFilter,
+      additional_filter: HISTORY_WIDGET_FILTER,
     },
   };
 
@@ -115,7 +127,7 @@ WorkflowExtension.init_widgets_for_workflow_page = function () {
       parent_instance: object,
       model: Cycle,
       countsName: currentWidgetCountsName,
-      additional_filter: currentWidgetFilter,
+      additional_filter: CURRENT_WIDGET_FILTER,
       add_item_view: 'cycle_task_group_object_tasks/tree-add-item',
     },
   };
