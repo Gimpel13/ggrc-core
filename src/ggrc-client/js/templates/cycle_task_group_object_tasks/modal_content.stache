@@ -180,7 +180,7 @@
           date:bind="instance.start_date"
           required:from="true"
           noWeekends:from="true"
-          readonly:from="true"/>
+        />
         {{#instance.computed_errors.start_date}}
         <label class="help-inline warning">{{this}}</label>
         {{/instance.computed_errors.start_date}}
@@ -195,7 +195,7 @@
           date:bind="instance.end_date"
           required:from="true"
           noWeekends:from="true"
-          readonly:from="true"/>
+        />
           {{#instance.computed_errors.end_date}}
           <label class="help-inline warning">{{this}}</label>
           {{/instance.computed_errors.end_date}}

@@ -223,65 +223,20 @@ describe('datepicker component', function () {
       });
     });
 
-    describe('prepareDate() method', function () {
-      let method;
-      let viewModel;
-
-      beforeEach(function () {
-        viewModel = getComponentVM(Component);
-        method = events.prepareDate.bind(viewModel);
-      });
-
-      it('returns null for incorrect date', function () {
-        expect(method(viewModel, 'some string')).toBe(null);
-        expect(method(viewModel, '11.12.68')).toBe(null);
-        expect(method(viewModel, '11.12.2017')).toBe(null);
-        expect(method(viewModel, '')).toBe(null);
-      });
-
-      it('returns ISO date formated for correct date', function () {
-        expect(method(viewModel, '11/12/2017')).toBe('2017-11-12');
-        expect(method(viewModel, ' 11/12/2017')).toBe('2017-11-12');
-        expect(method(viewModel, '11/12/2017 ')).toBe('2017-11-12');
-      });
-    });
-
     describe('"{viewModel} setMinDate" handler', function () {
       let method;
-      let viewModel;
       let that;
-
       beforeEach(function () {
-        viewModel = getComponentVM(Component);
         that = {
-          viewModel,
+          updateDate: jasmine.createSpy(),
         };
         method = events['{viewModel} setMinDate'].bind(that);
       });
-      it('does not change _date if updated date is falsy', function () {
-        viewModel.attr('_date', '11/11/2011');
-        that.updateDate = jasmine.createSpy()
-          .and.returnValue(new Date());
-        method([viewModel], {});
-        expect(viewModel.attr('_date')).toEqual('11/11/2011');
-      });
-      it('does not change _date if updated date is before current date',
+      it('calls updateDate with "minDate" and new date as arguments',
         function () {
-          viewModel.attr('_date', '11/11/2011');
-          viewModel.attr('date', '2011-11-11');
-          that.updateDate = jasmine.createSpy()
-            .and.returnValue(new Date('2010-10-10'));
-          method([viewModel], {});
-          expect(viewModel.attr('_date')).toEqual('11/11/2011');
-        });
-      it('changes _date if updated date is after current date',
-        function () {
-          viewModel.attr('_date', '2011-11-11');
-          viewModel.attr('date', '2011-11-11');
-          that.updateDate = jasmine.createSpy()
-            .and.returnValue(new Date('2012-12-12'));
-          method([viewModel], {});
-          expect(viewModel.attr('_date')).toEqual('12/12/2012');
+          let date = '11-11-2011';
+          method([], {}, date);
+          expect(that.updateDate).toHaveBeenCalledWith('minDate', date);
         });
     });
 
@@ -300,34 +255,6 @@ describe('datepicker component', function () {
           method([], {}, date);
           expect(that.updateDate).toHaveBeenCalledWith('maxDate', date);
         });
-    });
-
-    describe('"{viewModel} _date" handler', function () {
-      let method;
-      let that;
-      let viewModel;
-
-      beforeEach(function () {
-        viewModel = getComponentVM(Component);
-        viewModel.picker = {
-          datepicker: jasmine.createSpy(),
-        };
-        that = {
-          prepareDate: jasmine.createSpy()
-            .and.returnValue('ISODate'),
-        };
-        method = events['{viewModel} _date'].bind(that);
-      });
-
-      it('sets prepared date to viewModel', function () {
-        method([viewModel], {}, {});
-        expect(viewModel.attr('date')).toEqual('ISODate');
-      });
-      it('sets prepared date to datepicker', function () {
-        method([viewModel], {}, {});
-        expect(viewModel.picker.datepicker)
-          .toHaveBeenCalledWith('setDate', 'ISODate');
-      });
     });
 
     describe('"{window} mousedown" handler', function () {

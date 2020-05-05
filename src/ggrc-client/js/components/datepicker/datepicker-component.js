@@ -24,7 +24,6 @@ export default canComponent.extend({
     label: '',
     setMinDate: null,
     setMaxDate: null,
-    _date: null, // the internal value of the text input field
     define: {
       date: {
         set(newValue) {
@@ -38,10 +37,6 @@ export default canComponent.extend({
           }
           return newValue;
         },
-      },
-      readonly: {
-        type: 'boolean',
-        value: false,
       },
       disabled: {
         type: 'boolean',
@@ -193,50 +188,12 @@ export default canComponent.extend({
       return date;
     },
 
-    /**
-     * Prepeare date to ISO format.
-     *
-     * @param {Object} viewModel - viewModel of the Component
-     * @param {string|null} val - the new value of the date setting.
-     *   If given as string, it must be in ISO date format.
-     * @return {string|null} - the new date value
-     */
-    prepareDate: function (viewModel, val) {
-      let valISO = null;
-      let valF = null;
-
-      if (val) {
-        val = val.trim();
-        valF = moment.utc(val, DATE_FORMAT.MOMENT_DISPLAY_FMT, true);
-        valISO = valF.isValid() ?
-          valF.format(DATE_FORMAT.MOMENT_ISO_DATE) :
-          null;
-      }
-      return valISO;
-    },
-
     '{viewModel} setMinDate': function ([viewModel], ev, date) {
-      let currentDateObj = null;
-      let updated = this.updateDate('minDate', date);
-
-      if (viewModel.date) {
-        currentDateObj = moment.utc(viewModel.date).toDate();
-        if (currentDateObj < updated) {
-          this.viewModel.attr(
-            '_date',
-            moment.utc(updated).format(DATE_FORMAT.MOMENT_DISPLAY_FMT));
-        }
-      }
+      this.updateDate('minDate', date);
     },
 
     '{viewModel} setMaxDate': function ([viewModel], ev, date) {
       this.updateDate('maxDate', date);
-    },
-
-    '{viewModel} _date': function ([viewModel], ev, val) {
-      let valISO = this.prepareDate(viewModel, val);
-      viewModel.attr('date', valISO);
-      viewModel.picker.datepicker('setDate', valISO);
     },
 
     '{window} mousedown': function (el, ev) {
