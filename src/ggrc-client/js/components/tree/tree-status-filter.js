@@ -79,11 +79,8 @@ let viewModel = canMap.extend({
     }
   },
   buildSearchQuery(states) {
-    let allStates = this.attr('allStates');
-    let modelName = this.attr('modelName');
-    let query = (states.length && loDifference(allStates, states).length) ?
-      StateUtils.buildStatusFilter(states, modelName) :
-      null;
+    const modelName = this.attr('modelName');
+    const query = StateUtils.buildStatusFilter(states, modelName);
 
     this.dispatch({
       type: 'searchQueryChanged',

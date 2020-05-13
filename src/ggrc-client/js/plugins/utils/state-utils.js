@@ -139,15 +139,20 @@ function getBulkStatesForModel(model) {
  * @param {Array} statuses - array of active statuses
  * @param {String} modelName - model name
  * @param {Boolean} inverse - the flag indicathes whether filter should be inversed
- * @return {String} The transformed query
+ * @return {Object} The query
  */
 function buildStatusFilter(statuses, modelName, inverse) {
+  const allStatuses = getStatesForModel(modelName);
+
   if (inverse) {
-    let allStatuses = getStatesForModel(modelName);
     statuses = loDifference(allStatuses, statuses);
   }
 
-  let filter = modelName === 'Assessment' ?
+  if (allStatuses.length === statuses.length || statuses.length === 0) {
+    return {expression: {}};
+  }
+
+  const filter = modelName === 'Assessment' ?
     buildAssessmentFilter(statuses, buildFilterExpression) :
     buildFilterExpression(statuses, modelName);
 

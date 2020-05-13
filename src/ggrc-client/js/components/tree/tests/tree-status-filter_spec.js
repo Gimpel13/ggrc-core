@@ -21,33 +21,13 @@ describe('tree-status-filter component', () => {
     const FILTER = {
       expression: 'test',
     };
+
     beforeEach(() => {
       spyOn(StateUtils, 'buildStatusFilter').and.returnValue(FILTER);
-      spyOn(StateUtils, 'getStatesForModel').and.returnValue(['A', 'B', 'C']);
       spyOn(viewModel, 'dispatch');
     });
 
-    it('dispatches empty query when all statuses selected', () => {
-      viewModel.buildSearchQuery(['A', 'B', 'C']);
-
-      expect(viewModel.dispatch).toHaveBeenCalledWith({
-        type: 'searchQueryChanged',
-        name: 'status',
-        query: null,
-      });
-    });
-
-    it('dispatches empty query when no status selected', () => {
-      viewModel.buildSearchQuery([]);
-
-      expect(viewModel.dispatch).toHaveBeenCalledWith({
-        type: 'searchQueryChanged',
-        name: 'status',
-        query: null,
-      });
-    });
-
-    it('dispatches NOT empty query when some status selected', () => {
+    it('dispatches "searchQueryChanged" event with status filter', () => {
       viewModel.buildSearchQuery(['A']);
 
       expect(viewModel.dispatch).toHaveBeenCalledWith({

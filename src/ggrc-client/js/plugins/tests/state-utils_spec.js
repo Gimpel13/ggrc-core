@@ -9,20 +9,27 @@ import * as CurrentPageUtils from '../utils/current-page-utils';
 
 describe('StateUtils', function () {
   describe('buildStatusFilter() method', function () {
-    it('buildStatusFilter() should return filter with all statuses',
-      function () {
-        let statuses = [
-          'Draft', 'Active', 'Deprecated',
-        ];
-        let expectedFilter = {
-          expression: {
-            left: 'Status',
-            op: {name: 'IN'},
-            right: ['Draft', 'Active', 'Deprecated'],
-          },
+    it('should return empty filter if all statuses are selected',
+      () => {
+        const statuses = ['Active', 'Draft', 'Deprecated'];
+        const expectedFilter = {
+          expression: {},
         };
 
-        let statesFilter = StateUtils.buildStatusFilter(statuses);
+        const statesFilter = StateUtils.buildStatusFilter(statuses, 'Program');
+
+        expect(statesFilter).toEqual(expectedFilter);
+      }
+    );
+
+    it('should return empty filter if no status is selected',
+      () => {
+        const statuses = [];
+        const expectedFilter = {
+          expression: {},
+        };
+
+        const statesFilter = StateUtils.buildStatusFilter(statuses, 'Program');
 
         expect(statesFilter).toEqual(expectedFilter);
       }
